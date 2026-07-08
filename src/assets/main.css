@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+@theme {
+    --color-mm-dark: #0b1220;
+    --color-mm-navy: #111a2e;
+    --color-mm-lightnavy: #1b2436;
+    --color-mm-primary: #30a8fc;
+    --color-mm-white: #e7eef8;
+    --color-mm-gray: #6b768d;
+    --color-mm-success: #3ec97a;
+    --color-mm-error: #ff4d67;
+    --color-mm-warning: #ffd942;
+    --color-mm-neutral: #3b82f6;
+    --font-sans: "Inter", sans-serif;
+}
+
 html,
 body,
 #app {
