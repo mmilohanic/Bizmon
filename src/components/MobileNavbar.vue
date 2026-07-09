@@ -1,11 +1,11 @@
 <script setup>
-    defineProps(["navItems"]);
+    import doctypesData from "@/data/doctypesData";
 </script>
 
 <template>
     <div class="h-20 bg-mm-navy flex justify-around items-center">
         <div
-            v-for="(item,, idx) in $props.navItems"
+            v-for="(item,, idx) in doctypesData"
             class="text-mm-gray size-16.5"
             :class="{
                 'bg-mm-lightnavy text-mm-primary rounded-xl':

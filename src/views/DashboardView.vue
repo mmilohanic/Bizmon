@@ -1,17 +1,8 @@
 <script setup>
     import DashboardHeader from "@/components/DashboardHeader.vue";
     import MobileNavbar from "@/components/MobileNavbar.vue";
-    import {
-        CircleUser,
-        FileText,
-        ListTodo,
-        Package,
-        ReceiptEuro,
-        ChartNoAxesCombined,
-        ChevronDown,
-        CreditCard,
-        Receipt,
-    } from "@lucide/vue";
+    import doctypesData from "@/data/doctypesData";
+    import { ChartNoAxesCombined, ChevronDown, CreditCard } from "@lucide/vue";
     import { ref } from "vue";
 
     const options = [
@@ -21,29 +12,6 @@
         "6 mjeseci",
         "jedna godina",
         "od početka",
-    ];
-
-    const navbarItems = [
-        {
-            icon: FileText,
-            label: "Ponude",
-        },
-        {
-            icon: Package,
-            label: "Narudžbe",
-        },
-        {
-            icon: CircleUser,
-            label: "Početna",
-        },
-        {
-            icon: ListTodo,
-            label: "Nalozi",
-        },
-        {
-            icon: ReceiptEuro,
-            label: "Računi",
-        },
     ];
 
     const billsTest = [
@@ -63,15 +31,15 @@
     const recentTest = [
         {
             name: "Klime zgrada Žminj",
-            type: "bill",
+            type: "Računi",
         },
         {
             name: "Sv. Lovreč - iskop Perić",
-            type: "offer",
+            type: "Ponude",
         },
         {
             name: "Elektroinstalacija Marić",
-            type: "order",
+            type: "Narudžbe",
         },
     ];
 
@@ -84,16 +52,7 @@
     }
 
     function chooseIcon(document) {
-        switch (document) {
-            case "offer":
-                return FileText;
-            case "order":
-                return Package;
-            case "task":
-                return ListTodo;
-            case "bill":
-                return ReceiptEuro;
-        }
+        return doctypesData.find((dtype) => dtype.label === document).icon;
     }
 </script>
 
@@ -126,7 +85,7 @@
                             class="absolute w-full bg-mm-white text-black rounded-bl rounded-br"
                         >
                             <li
-                                v-for="(option,, idx) in options.filter(
+                                v-for="(option, idx) in options.filter(
                                     (item) => item != selected,
                                 )"
                                 class="w-[95%] mx-auto px-1 py-0.5 border-t border-mm-gray"
@@ -143,7 +102,7 @@
 
                 <div class="flex flex-col">
                     <div
-                        v-for="(item, idx) in navbarItems.filter(
+                        v-for="(item, idx) in doctypesData.filter(
                             (item) => item.label != 'Početna',
                         )"
                         class="flex py-2 first:pt-1 last:pb-0 pe-1 items-end justify-between not-first:border-t not-first:border-mm-gray font-semibold"
@@ -207,7 +166,7 @@
             </div>
         </div>
 
-        <MobileNavbar :nav-items="navbarItems" class="fixed bottom-0 w-full" />
+        <MobileNavbar class="fixed bottom-0 w-full" />
     </div>
 </template>
 
