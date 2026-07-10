@@ -14,6 +14,18 @@
     --font-sans: "Inter", sans-serif;
 }
 
+.input-block {
+    @apply flex flex-col gap-4;
+}
+
+.input-label {
+    @apply text-mm-gray text-xl font-extrabold tracking-wide;
+}
+
+.input-field {
+    @apply bg-mm-navy text-mm-gray flex gap-3 items-center text-lg px-2.5 py-2 rounded-xl;
+}
+
 html,
 body,
 #app {
