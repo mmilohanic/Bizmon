@@ -1,7 +1,13 @@
 <script setup>
     import LoginRegisterBar from "@/components/LoginRegisterBar.vue";
     import { useTestingStore } from "@/stores/testingStore";
-    import { AtSign, IdCard, KeyRound, Repeat2 } from "@lucide/vue";
+    import {
+        AtSign,
+        CircleCheckBig,
+        IdCard,
+        KeyRound,
+        Repeat2,
+    } from "@lucide/vue";
     import { ref, computed } from "vue";
     import { useRouter } from "vue-router";
 
@@ -11,6 +17,8 @@
     const email = ref("");
     const password = ref("");
     const repeated = ref("");
+
+    const succ_reg = ref(false);
 
     const checkUsername = computed(() => {
         if (username.value.length < 3)
@@ -108,7 +116,7 @@
             password.value = "";
             repeated.value = "";
 
-            router.push("/login");
+            succ_reg.value = true;
         }
     }
 </script>
@@ -120,7 +128,9 @@
             <span class="text-mm-primary">MON</span>
         </div>
 
+        <!-- Forma za registraciju -->
         <div
+            v-if="!succ_reg"
             class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
         >
             <div v-for="item in loginData" class="input-block">
@@ -158,6 +168,31 @@
             </button>
         </div>
 
-        <LoginRegisterBar class="fixed bottom-0 w-full" />
+        <!-- Uspješna registracija -->
+        <div
+            v-else
+            class="bg-mm-lightnavy px-6 pt-15 pb-18 rounded-3xl w-full flex flex-col gap-15 items-center"
+        >
+            <CircleCheckBig class="size-35 stroke-[0.75] text-mm-success" />
+            <hr class="border-mm-gray w-full" />
+            <div
+                class="text-3xl text-mm-white flex flex-col items-center font-extralight"
+            >
+                <span>Registracija je</span>
+                <span>uspješno dovršena.</span>
+                <span>Nastavite s prijavom.</span>
+            </div>
+            <button
+                @click="
+                    router.push('/login');
+                    succ_reg = false;
+                "
+                class="bg-mm-primary text-mm-dark text-lg font-extrabold flex items-center w-fit mx-auto py-2 px-15 rounded-full"
+            >
+                NASTAVI
+            </button>
+        </div>
+
+        <LoginRegisterBar v-if="!succ_reg" class="fixed bottom-0 w-full" />
     </div>
 </template>

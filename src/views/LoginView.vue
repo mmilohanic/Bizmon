@@ -67,6 +67,7 @@
             </div>
             <button
                 class="bg-mm-primary text-mm-dark text-lg font-extrabold flex gap-4 items-center w-fit mx-auto py-1.5 px-10 rounded-full"
+                :disabled="!(email && password)"
                 @click="logIn()"
             >
                 <span>PRIJAVA</span>
