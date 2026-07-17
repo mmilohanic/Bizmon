@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useTestingStore = defineStore("testingStore", () => {
+    const loggedUser = ref(false);
+
     const users = ref([
         {
             username: "Test User",
@@ -12,7 +14,9 @@ export const useTestingStore = defineStore("testingStore", () => {
 
     function logUser(email, password) {
         const user = users.value.find((u) => u.email === email);
-        return user && user.password === password;
+
+        if (user && user.password === password) loggedUser.value = user;
+        return loggedUser.value;
     }
 
     function addUser(username, email, password) {
@@ -24,6 +28,7 @@ export const useTestingStore = defineStore("testingStore", () => {
     }
 
     return {
+        loggedUser,
         logUser,
         addUser,
     };
