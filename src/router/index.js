@@ -3,14 +3,14 @@ import Error404 from "@/views/Error404.vue";
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import { createRouter, createWebHistory } from "vue-router";
-import { useTestingStore } from "@/stores/testingStore";
+import { auth, loggedUser } from "@/firebase";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
             path: "/",
-            name: "početna",
+            name: "dashboard",
             component: DashboardView,
         },
         {
@@ -31,12 +31,12 @@ const router = createRouter({
     ],
 });
 
-router.beforeEach((to) => {
-    const testingStore = useTestingStore();
+router.beforeEach(async (to) => {
+    await auth.authStateReady();
     const publicRoute = ["login", "register"].includes(to.name);
 
-    if (!testingStore.loggedUser && !publicRoute) return { name: "login" };
-    if (testingStore.loggedUser && publicRoute) return { name: "početna" };
+    if (!loggedUser.value && !publicRoute) return { name: "login" };
+    if (loggedUser.value && publicRoute) return { name: "dashboard" };
 });
 
 export default router;

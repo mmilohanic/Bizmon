@@ -1,6 +1,6 @@
 <script setup>
     import LoginRegisterBar from "@/components/LoginRegisterBar.vue";
-    import { useTestingStore } from "@/stores/testingStore";
+    import firebaseError from "@/data/errorsData";
     import {
         AtSign,
         CircleCheckBig,
@@ -10,6 +10,12 @@
     } from "@lucide/vue";
     import { ref, computed } from "vue";
     import { useRouter } from "vue-router";
+    import {
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+    } from "firebase/auth";
+    import { db, auth } from "@/firebase";
+    import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
     const router = useRouter();
 
@@ -18,7 +24,8 @@
     const password = ref("");
     const repeated = ref("");
 
-    const succ_reg = ref(false);
+    const succReg = ref(false);
+    const regErr = ref("");
 
     const checkUsername = computed(() => {
         if (username.value.length < 3)
@@ -103,21 +110,36 @@
         loginData.map((item) => item.rules).every((rule) => !rule.value),
     );
 
-    function registerUser() {
+    async function registerUser() {
         if (allValid.value) {
-            useTestingStore().addUser(
-                username.value,
-                email.value,
-                password.value,
-            );
+            regErr.value = "";
+            try {
+                const new_reg = await createUserWithEmailAndPassword(
+                    auth,
+                    email.value,
+                    password.value,
+                );
 
-            username.value = "";
-            email.value = "";
-            password.value = "";
-            repeated.value = "";
+                await setDoc(doc(db, "users", new_reg.user.uid), {
+                    username: username.value,
+                    email: email.value,
+                    registered_on: serverTimestamp(),
+                    collabs_count: 0,
+                    active: true,
+                });
 
-            succ_reg.value = true;
+                succReg.value = true;
+            } catch (error) {
+                console.log(error);
+                regErr.value = firebaseError(error.code);
+            }
         }
+    }
+
+    async function logIn() {
+        await signInWithEmailAndPassword(auth, email.value, password.value);
+        succReg.value = false;
+        router.push("/");
     }
 </script>
 
@@ -129,8 +151,9 @@
         </div>
 
         <!-- Forma za registraciju -->
-        <div
-            v-if="!succ_reg"
+        <form
+            v-if="!succReg"
+            @submit.prevent="registerUser()"
             class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
         >
             <div v-for="item in loginData" class="input-block">
@@ -150,7 +173,13 @@
                         :placeholder="item.placeholder"
                         class="w-full"
                         v-model="item.data.value"
-                        @blur="item.visited.value = Boolean(item.data.value)"
+                        @blur="
+                            item.label.includes('PONOVI')
+                                ? {}
+                                : (item.visited.value = Boolean(
+                                      item.data.value,
+                                  ))
+                        "
                     />
                     <span
                         v-if="item.data.value && item.visited.value"
@@ -159,14 +188,21 @@
                     >
                 </div>
             </div>
-            <button
-                :disabled="!allValid"
-                @click="registerUser()"
-                class="bg-mm-primary text-mm-dark disabled:bg-mm-gray text-lg font-extrabold flex items-center w-fit mx-auto py-2 px-8 rounded-full"
-            >
-                REGISTRIRAJ SE
-            </button>
-        </div>
+            <div class="relative flex flex-col items-center">
+                <button
+                    :disabled="!allValid"
+                    type="submit"
+                    class="bg-mm-primary text-mm-dark disabled:bg-mm-gray text-lg font-extrabold flex items-center w-fit py-2 px-8 rounded-full"
+                >
+                    REGISTRIRAJ SE
+                </button>
+                <span
+                    v-if="regErr.length"
+                    class="absolute text-mm-error text-sm -bottom-6"
+                    >{{ regErr }}</span
+                >
+            </div>
+        </form>
 
         <!-- Uspješna registracija -->
         <div
@@ -183,16 +219,13 @@
                 <span>Nastavite s prijavom.</span>
             </div>
             <button
-                @click="
-                    router.push('/login');
-                    succ_reg = false;
-                "
+                @click="logIn()"
                 class="bg-mm-primary text-mm-dark text-lg font-extrabold flex items-center w-fit mx-auto py-2 px-15 rounded-full"
             >
                 NASTAVI
             </button>
         </div>
 
-        <LoginRegisterBar v-if="!succ_reg" class="fixed bottom-0 w-full" />
+        <LoginRegisterBar v-if="!succReg" class="fixed bottom-0 w-full" />
     </div>
 </template>

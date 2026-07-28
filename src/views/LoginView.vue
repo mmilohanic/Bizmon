@@ -1,14 +1,15 @@
 <script setup>
     import LoginRegisterBar from "@/components/LoginRegisterBar.vue";
-    import { useTestingStore } from "@/stores/testingStore";
+    import firebaseError from "@/data/errorsData";
+    import { auth } from "@/firebase";
     import { ArrowRight, AtSign, KeyRound } from "@lucide/vue";
+    import { signInWithEmailAndPassword } from "firebase/auth";
     import { ref } from "vue";
     import { useRouter } from "vue-router";
 
     const router = useRouter();
-    const testingStore = useTestingStore();
 
-    const valid_creds = ref(true);
+    const loginErr = ref("");
     const email = ref("");
     const password = ref("");
 
@@ -29,10 +30,15 @@
         },
     ];
 
-    function logIn() {
-        valid_creds.value = testingStore.logUser(email.value, password.value);
+    async function logIn() {
+        loginErr.value = "";
+        try {
+            await signInWithEmailAndPassword(auth, email.value, password.value);
+        } catch (error) {
+            loginErr.value = firebaseError(error.code);
+        }
 
-        if (valid_creds.value) router.push("/");
+        if (!loginErr.value) router.push("/");
     }
 </script>
 
@@ -43,7 +49,9 @@
             <span class="text-mm-primary">MON</span>
         </div>
 
-        <div
+        <
+        <form
+            @submit.prevent="logIn()"
             class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
         >
             <div v-for="item in loginData" class="input-block">
@@ -60,20 +68,20 @@
                 </div>
             </div>
             <div class="relative flex flex-col items-center">
-                <span v-if="!valid_creds" class="absolute top-1 text-mm-error"
-                    >Neispravno korisničko ime ili lozinka!</span
-                >
+                <span v-if="loginErr" class="absolute top-1 text-mm-error">{{
+                    loginErr
+                }}</span>
                 <hr class="border-mm-gray w-full" />
             </div>
             <button
                 class="bg-mm-primary text-mm-dark text-lg font-extrabold flex gap-4 items-center w-fit mx-auto py-1.5 px-10 rounded-full"
                 :disabled="!(email && password)"
-                @click="logIn()"
+                type="submit"
             >
                 <span>PRIJAVA</span>
                 <ArrowRight />
             </button>
-        </div>
+        </form>
 
         <LoginRegisterBar class="fixed bottom-0 w-full" />
     </div>

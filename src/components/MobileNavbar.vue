@@ -5,11 +5,11 @@
 <template>
     <div class="h-20 bg-mm-navy flex justify-around items-center">
         <div
-            v-for="(item,, idx) in doctypesData"
+            v-for="(item, idx) in doctypesData"
             class="text-mm-gray size-16.5"
             :class="{
                 'bg-mm-lightnavy text-mm-primary rounded-xl':
-                    item.label.toLowerCase() == $route.name,
+                    item.path == $route.path,
             }"
             :key="idx"
         >

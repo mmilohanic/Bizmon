@@ -58,7 +58,7 @@
 
 <template>
     <div class="bg-mm-dark h-screen">
-        <DashboardHeader class="fixed top-0 w-full" />
+        <DashboardHeader class="fixed top-0 w-full z-50" />
 
         <div class="py-26 px-8 flex flex-col gap-4">
             <!-- Statistika -->
@@ -166,7 +166,7 @@
             </div>
         </div>
 
-        <MobileNavbar class="fixed bottom-0 w-full" />
+        <MobileNavbar class="fixed bottom-0 w-full z-50" />
     </div>
 </template>
 
