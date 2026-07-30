@@ -13,8 +13,8 @@
     import { useRouter } from "vue-router";
 
     const router = useRouter();
+    const props = defineProps(["infoModal"]);
 
-    const openInfo = ref(false);
     const openMenu = ref(false);
 
     const menuItems = [
@@ -52,9 +52,7 @@
 
 <template>
     <div>
-        <div
-            class="h-20 bg-mm-navy flex items-center justify-between px-6 z-50"
-        >
+        <div class="h-20 bg-mm-navy flex items-center justify-between px-6">
             <span class="text-5xl font-extrabold">
                 <span class="text-mm-white">BIZ</span>
                 <span class="text-mm-primary">MON</span>
@@ -63,10 +61,11 @@
                 <User
                     class="size-11 text-mm-gray p-1.5"
                     :class="{
-                        'text-mm-primary bg-mm-lightnavy rounded-lg': openInfo,
+                        'text-mm-primary bg-mm-lightnavy rounded-lg':
+                            props.infoModal,
                     }"
                     @click="
-                        openInfo = !openInfo;
+                        $emit('triggerInfo', !props.infoModal);
                         openMenu = false;
                     "
                 />
@@ -74,7 +73,7 @@
                     class="size-11 text-mm-gray p-1.5"
                     @click="
                         openMenu = !openMenu;
-                        openInfo = false;
+                        $emit('triggerInfo', false);
                     "
                     :class="{
                         'text-mm-primary bg-mm-lightnavy rounded-lg': openMenu,
@@ -82,24 +81,20 @@
                 />
             </div>
         </div>
-        <div
-            v-if="openMenu"
-            class="flex border-t border-b border-mm-gray bg-mm-navy text-mm-white text-xl py-2"
-        >
+        <div v-if="openMenu">
             <div
-                v-for="(item, idx) in menuItems"
-                @click="makeAction(item)"
-                class="flex gap-2 items-center w-1/3 py-1 not-first:border-l not-first:border-mm-gray justify-center"
-                :key="idx"
+                class="flex border-t border-b shadow-xl shadow-mm-dark border-mm-gray bg-mm-navy text-mm-white text-xl py-2"
             >
-                <component :is="item.icon" />
-                <span>{{ item.label }}</span>
+                <div
+                    v-for="(item, idx) in menuItems"
+                    @click="makeAction(item)"
+                    class="flex gap-2 items-center w-1/3 py-1 not-first:border-l not-first:border-mm-gray justify-center"
+                    :key="idx"
+                >
+                    <component :is="item.icon" />
+                    <span>{{ item.label }}</span>
+                </div>
             </div>
         </div>
-        <div
-            v-if="openMenu"
-            class="h-screen backdrop-blur-sm z-40"
-            @click="openMenu = false"
-        ></div>
     </div>
 </template>

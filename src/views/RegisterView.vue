@@ -13,6 +13,7 @@
     import {
         createUserWithEmailAndPassword,
         signInWithEmailAndPassword,
+        updateProfile,
     } from "firebase/auth";
     import { db, auth } from "@/firebase";
     import { doc, serverTimestamp, setDoc } from "firebase/firestore";
@@ -114,13 +115,17 @@
         if (allValid.value) {
             regErr.value = "";
             try {
-                const new_reg = await createUserWithEmailAndPassword(
+                const newReg = await createUserWithEmailAndPassword(
                     auth,
                     email.value,
                     password.value,
                 );
 
-                await setDoc(doc(db, "users", new_reg.user.uid), {
+                await updateProfile(newReg.user, {
+                    displayName: username.value,
+                });
+
+                await setDoc(doc(db, "users", newReg.user.uid), {
                     username: username.value,
                     email: email.value,
                     registered_on: serverTimestamp(),
