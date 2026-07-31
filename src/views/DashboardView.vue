@@ -16,7 +16,9 @@
     import {
         deleteUser,
         EmailAuthProvider,
+        GoogleAuthProvider,
         reauthenticateWithCredential,
+        reauthenticateWithPopup,
         updatePassword,
     } from "firebase/auth";
     import { doc, updateDoc } from "firebase/firestore";
@@ -33,6 +35,9 @@
     const errMsg = ref(null);
     const oldPassOK = ref(false);
     const succPassChange = ref(false);
+    const googleDeleteError = ref(null);
+    const normalLogin =
+        loggedUser.value.providerData[0].providerId === "password";
 
     defineEmits(["triggerInfo"]);
 
@@ -162,6 +167,33 @@
                 oldPassOK.value = false;
             } catch (error) {
                 errMsg.value = firebaseError(error.code);
+            }
+        }
+    }
+
+    async function deleteGoogleAccount() {
+        const user = auth.currentUser;
+        googleDeleteError.value = null;
+
+        try {
+            await reauthenticateWithPopup(user, new GoogleAuthProvider());
+
+            await updateDoc(doc(db, "users", user.uid), {
+                username: "Deleted user",
+                email: "",
+                active: false,
+            });
+
+            await deleteUser(user);
+            router.push("/login");
+        } catch (error) {
+            if (
+                ![
+                    "auth/popup-closed-by-user",
+                    "auth/cancelled-popup-request",
+                ].includes(error.code)
+            ) {
+                googleDeleteError.value = firebaseError(error.code);
             }
         }
     }
@@ -311,8 +343,14 @@
                     >
                 </div>
                 <hr class="border-mm-gray border my-4" />
-                <div class="flex justify-between px-1">
+                <div
+                    class="flex px-1 relative"
+                    :class="
+                        normalLogin ? 'justify-between' : 'justify-center pt-3'
+                    "
+                >
                     <button
+                        v-if="normalLogin"
                         @click="
                             openInfo = !openInfo;
                             openConf = !openConf;
@@ -324,14 +362,23 @@
                     </button>
                     <button
                         @click="
-                            openInfo = !openInfo;
-                            openConf = !openConf;
-                            isDelete = true;
+                            if (normalLogin) {
+                                openInfo = !openInfo;
+                                openConf = !openConf;
+                                isDelete = true;
+                            } else {
+                                deleteGoogleAccount();
+                            }
                         "
                         class="bg-mm-error/80 text-mm-lightnavy font-extrabold tracking-wider rounded-lg py-1.5 px-4"
                     >
                         Obriši račun
                     </button>
+                    <span
+                        v-if="googleDeleteError"
+                        class="absolute bottom-10 text-mm-error text-sm"
+                        >{{ googleDeleteError }}</span
+                    >
                 </div>
             </div>
         </div>

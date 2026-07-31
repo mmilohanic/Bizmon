@@ -1,15 +1,27 @@
 <script setup>
+    import GoogleButton from "@/components/GoogleButton.vue";
     import LoginRegisterBar from "@/components/LoginRegisterBar.vue";
     import firebaseError from "@/data/errorsData";
-    import { auth } from "@/firebase";
+    import { auth, db } from "@/firebase";
     import { ArrowRight, AtSign, KeyRound } from "@lucide/vue";
-    import { signInWithEmailAndPassword } from "firebase/auth";
+    import {
+        GoogleAuthProvider,
+        signInWithEmailAndPassword,
+        signInWithPopup,
+    } from "firebase/auth";
+    import {
+        doc,
+        getDoc,
+        serverTimestamp,
+        setDoc,
+        updateDoc,
+    } from "firebase/firestore";
     import { ref } from "vue";
     import { useRouter } from "vue-router";
 
     const router = useRouter();
 
-    const loginErr = ref("");
+    const loginErr = ref(null);
     const email = ref("");
     const password = ref("");
 
@@ -31,14 +43,53 @@
     ];
 
     async function logIn() {
-        loginErr.value = "";
+        loginErr.value = null;
         try {
             await signInWithEmailAndPassword(auth, email.value, password.value);
+            router.push("/");
         } catch (error) {
             loginErr.value = firebaseError(error.code);
         }
+    }
 
-        if (!loginErr.value) router.push("/");
+    async function signInWithGoogle() {
+        loginErr.value = null;
+        try {
+            const response = await signInWithPopup(
+                auth,
+                new GoogleAuthProvider(),
+            );
+            const user = response.user;
+            const dbUser = doc(db, "users", user.uid);
+
+            if (!(await getDoc(dbUser)).exists()) {
+                await setDoc(dbUser, {
+                    username: user.displayName,
+                    email: user.email,
+                    registered_on: serverTimestamp(),
+                    collabs_count: 0,
+                    active: true,
+                });
+            }
+
+            if (user.displayName != (await getDoc(dbUser)).data().username) {
+                await updateDoc(dbUser, {
+                    username: auth.currentUser.displayName,
+                });
+            }
+
+            router.push("/");
+        } catch (error) {
+            if (
+                ![
+                    "auth/popup-closed-by-user",
+                    "auth/cancelled-popup-request",
+                ].includes(error.code)
+            ) {
+                console.log(error);
+                loginErr.value = firebaseError(error.code);
+            }
+        }
     }
 </script>
 
@@ -73,14 +124,21 @@
                 }}</span>
                 <hr class="border-mm-gray w-full" />
             </div>
-            <button
-                class="bg-mm-primary text-mm-dark text-lg font-extrabold flex gap-4 items-center w-fit mx-auto py-1.5 px-10 rounded-full"
-                :disabled="!(email && password)"
-                type="submit"
-            >
-                <span>PRIJAVA</span>
-                <ArrowRight />
-            </button>
+            <div class="flex flex-col gap-6 max-w-50 mx-auto">
+                <button
+                    class="bg-mm-primary flex place-content-center py-1.5 rounded-full"
+                    :disabled="!(email && password)"
+                    type="submit"
+                >
+                    <div
+                        class="text-mm-dark text-lg font-extrabold flex gap-3 items-center"
+                    >
+                        <span>PRIJAVA</span>
+                        <ArrowRight />
+                    </div>
+                </button>
+                <GoogleButton @click="signInWithGoogle()" />
+            </div>
         </form>
 
         <LoginRegisterBar class="fixed bottom-0 w-full" />

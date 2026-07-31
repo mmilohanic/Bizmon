@@ -11,6 +11,10 @@ export default function firebaseError(code) {
         "resource-exhausted": "Previše zahtjeva. Pokušajte kasnije.",
         "permission-denied": "Nemate dopuštenje za ovu radnju.",
         "not-found": "Zapis nije pronađen.",
+
+        "auth/popup-blocked": "Skočni prozor je blokiran.",
+        "auth/network-request-failed": "Greška mreže pri povezivanju.",
+        "auth/user-mismatch": "Potvrda s pogrešnim Google računom.",
     };
 
     return code in messages
