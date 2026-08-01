@@ -6,28 +6,28 @@
         {
             icon: LogIn,
             label: "PRIJAVA",
-            route: "login",
+            route: "/login",
         },
         {
             icon: UserPlus,
             label: "REGISTRACIJA",
-            route: "register",
+            route: "/register",
         },
     ]);
 </script>
 
 <template>
     <div class="h-25 px-8 py-6 bg-mm-navy flex">
-        <div
+        <router-link
             v-for="item in logRegData"
-            @click="$router.push('/' + item.route)"
+            :to="item.route"
             class="flex flex-col items-center justify-center w-1/2 text-mm-gray rounded-xl text-sm font-extrabold tracking-wide"
             :class="{
-                'text-mm-primary bg-mm-lightnavy': $route.name == item.route,
+                'text-mm-primary bg-mm-lightnavy': $route.path == item.route,
             }"
         >
             <component :is="item.icon" />
             <span>{{ item.label }}</span>
-        </div>
+        </router-link>
     </div>
 </template>

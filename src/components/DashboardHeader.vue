@@ -34,16 +34,10 @@
         },
     ];
 
-    async function makeAction(item) {
+    async function logOut() {
         try {
-            if (item.label === "Odjava") {
-                await signOut(auth);
-                router.push("/login");
-            } else {
-                router.push(item.path);
-            }
-
-            openMenu.value = false;
+            await signOut(auth);
+            router.push("/login");
         } catch (error) {
             alert(firebaseError(error.code));
         }
@@ -85,15 +79,17 @@
             <div
                 class="flex border-t border-b shadow-xl shadow-mm-dark border-mm-gray bg-mm-navy text-mm-white text-xl py-2"
             >
-                <div
+                <component
                     v-for="(item, idx) in menuItems"
-                    @click="makeAction(item)"
+                    :is="item.path ? 'router-link' : 'button'"
+                    :to="item.path"
+                    @click="item.path ?? logOut()"
                     class="flex gap-2 items-center w-1/3 py-1 not-first:border-l not-first:border-mm-gray justify-center"
                     :key="idx"
                 >
                     <component :is="item.icon" />
                     <span>{{ item.label }}</span>
-                </div>
+                </component>
             </div>
         </div>
     </div>

@@ -179,11 +179,8 @@
                         class="w-full"
                         v-model="item.data.value"
                         @blur="
-                            item.label.includes('PONOVI')
-                                ? {}
-                                : (item.visited.value = Boolean(
-                                      item.data.value,
-                                  ))
+                            if (!item.label.includes('PONOVI'))
+                                item.visited.value = Boolean(item.data.value);
                         "
                     />
                     <span
