@@ -1,6 +1,7 @@
 <script setup>
     import DashboardHeader from "@/components/DashboardHeader.vue";
     import MobileNavbar from "@/components/MobileNavbar.vue";
+    import ModalBase from "@/components/ModalBase.vue";
     import doctypesData from "@/data/doctypesData";
     import firebaseError from "@/data/errorsData";
     import { auth, db, loggedUser } from "@/firebase";
@@ -27,19 +28,16 @@
 
     const router = useRouter();
 
-    const openInfo = ref(false);
-    const openConf = ref(false);
+    const activeModal = ref(null);
     const password = ref("");
     const viewPass = ref(false);
-    const isDelete = ref(false);
     const errMsg = ref(null);
+    const oldPass = ref("");
     const oldPassOK = ref(false);
-    const succPassChange = ref(false);
-    const googleDeleteError = ref(null);
     const normalLogin =
         loggedUser.value.providerData[0].providerId === "password";
 
-    defineEmits(["triggerInfo"]);
+    defineEmits(["openInfo"]);
 
     const options = [
         "ovaj mjesec",
@@ -89,6 +87,14 @@
 
     function chooseIcon(document) {
         return doctypesData.find((dtype) => dtype.label === document).icon;
+    }
+
+    function openModal(name) {
+        errMsg.value = null;
+        password.value = "";
+        viewPass.value = false;
+        oldPassOK.value = false;
+        activeModal.value = name;
     }
 
     const checkPassword = computed(() => {
@@ -141,10 +147,13 @@
 
         if (!oldPassOK.value) {
             try {
-                oldPassOK.value = await reauthenticateWithCredential(
+                await reauthenticateWithCredential(
                     user,
                     EmailAuthProvider.credential(user.email, password.value),
                 );
+
+                oldPassOK.value = true;
+                oldPass.value = password.value;
                 password.value = "";
             } catch (error) {
                 if (
@@ -157,14 +166,12 @@
                     errMsg.value = firebaseError(error.code);
                 }
             }
+        } else if (password.value == oldPass.value) {
+            errMsg.value = "Nova lozinka mora biti različita od stare.";
         } else {
             try {
                 await updatePassword(user, password.value);
-
-                openConf.value = false;
-                succPassChange.value = true;
-                password.value = "";
-                oldPassOK.value = false;
+                openModal("succPassChange");
             } catch (error) {
                 errMsg.value = firebaseError(error.code);
             }
@@ -173,7 +180,7 @@
 
     async function deleteGoogleAccount() {
         const user = auth.currentUser;
-        googleDeleteError.value = null;
+        errMsg.value = null;
 
         try {
             await reauthenticateWithPopup(user, new GoogleAuthProvider());
@@ -193,7 +200,7 @@
                     "auth/cancelled-popup-request",
                 ].includes(error.code)
             ) {
-                googleDeleteError.value = firebaseError(error.code);
+                errMsg.value = firebaseError(error.code);
             }
         }
     }
@@ -202,8 +209,8 @@
 <template>
     <div class="bg-mm-dark h-screen">
         <DashboardHeader
-            :info-modal="openInfo"
-            @trigger-info="(state) => (openInfo = state)"
+            :info-active="activeModal === 'info'"
+            @open-info="openModal('info')"
             class="fixed top-0 w-full z-10"
         />
 
@@ -314,111 +321,97 @@
         </div>
 
         <!-- User modal -->
-        <div
-            v-if="openInfo"
-            class="bg-mm-dark/80 z-20 flex items-center justify-center px-8 fixed inset-0"
-            @click="openInfo = false"
-        >
-            <div
-                @click.stop
-                class="bg-mm-lightnavy border border-mm-gray rounded-2xl p-6 text-mm-white w-full"
-            >
-                <div class="flex justify-between px-1">
-                    <span class="text-2xl">O računu</span>
-                    <X class="size-8" @click="openInfo = false" />
-                </div>
-                <hr class="border-mm-gray border my-4" />
-                <div class="flex flex-col gap-2 px-1">
-                    <span class="text-2xl">{{ loggedUser.displayName }}</span>
-                    <span class="text-lg font-extralight">{{
-                        loggedUser.email
-                    }}</span>
-                    <span class="font-extralight"
-                        >Registriran:
-                        {{
-                            new Date(
-                                parseInt(loggedUser.metadata.createdAt),
-                            ).toLocaleDateString("hr-HR")
-                        }}</span
-                    >
-                </div>
-                <hr class="border-mm-gray border my-4" />
-                <div
-                    class="flex px-1 relative"
-                    :class="
-                        normalLogin ? 'justify-between' : 'justify-center pt-3'
-                    "
-                >
-                    <button
-                        v-if="normalLogin"
-                        @click="
-                            openInfo = !openInfo;
-                            openConf = !openConf;
-                            isDelete = false;
-                        "
-                        class="text-mm-primary font-bold py-1.5 px-1 border rounded-lg"
-                    >
-                        Promijeni lozinku
-                    </button>
-                    <button
-                        @click="
-                            if (normalLogin) {
-                                openInfo = !openInfo;
-                                openConf = !openConf;
-                                isDelete = true;
-                            } else {
-                                deleteGoogleAccount();
-                            }
-                        "
-                        class="bg-mm-error/80 text-mm-lightnavy font-extrabold tracking-wider rounded-lg py-1.5 px-4"
-                    >
-                        Obriši račun
-                    </button>
-                    <span
-                        v-if="googleDeleteError"
-                        class="absolute bottom-10 text-mm-error text-sm"
-                        >{{ googleDeleteError }}</span
-                    >
-                </div>
+        <ModalBase v-if="activeModal === 'info'" @click="openModal(null)">
+            <div class="flex justify-between items-center">
+                <span class="text-2xl">O računu</span>
+                <X class="size-8" @click="openModal(null)" />
             </div>
-        </div>
+            <hr class="border-mm-gray border my-4" />
+            <div class="flex flex-col gap-2 px-1">
+                <span class="text-2xl">{{ loggedUser.displayName }}</span>
+                <span class="text-lg font-extralight">{{
+                    loggedUser.email
+                }}</span>
+                <span class="font-extralight"
+                    >Registriran:
+                    {{
+                        new Date(
+                            parseInt(loggedUser.metadata.createdAt),
+                        ).toLocaleDateString("hr-HR")
+                    }}</span
+                >
+            </div>
+            <hr class="border-mm-gray border my-4" />
+            <div
+                class="flex px-1 relative"
+                :class="normalLogin ? 'justify-between' : 'justify-center pt-3'"
+            >
+                <button
+                    v-if="normalLogin"
+                    @click="openModal('changePass')"
+                    class="text-mm-primary font-bold py-1.5 px-1 border rounded-lg"
+                >
+                    Promijeni lozinku
+                </button>
+                <button
+                    @click="
+                        normalLogin
+                            ? openModal('deleteAcc')
+                            : deleteGoogleAccount()
+                    "
+                    class="bg-mm-error/80 text-mm-lightnavy font-extrabold tracking-wider rounded-lg py-1.5 px-4"
+                >
+                    Obriši račun
+                </button>
+                <span
+                    v-if="errMsg"
+                    class="absolute bottom-10 text-mm-error text-sm"
+                    >{{ errMsg }}</span
+                >
+            </div>
+        </ModalBase>
 
         <!-- Conformation modal -->
-        <div
-            v-if="openConf"
-            class="bg-mm-dark/80 z-20 flex items-center justify-center px-8 fixed inset-0"
-            @click="
-                openConf = false;
-                openInfo = true;
-                password = '';
-                oldPassOK = false;
-            "
+        <ModalBase
+            v-if="['changePass', 'deleteAcc'].includes(activeModal)"
+            @click="openModal('info')"
         >
             <form
-                @submit.prevent="isDelete ? deleteAccount() : changePassword()"
-                @click.stop
-                class="flex flex-col gap-4 bg-mm-lightnavy border border-mm-gray rounded-2xl p-6 text-mm-white w-full"
+                @submit.prevent="
+                    activeModal === 'changePass'
+                        ? changePassword()
+                        : deleteAccount()
+                "
+                class="flex flex-col gap-4"
             >
-                <div class="input-block relative">
-                    <X
-                        class="absolute right-0 -top-1 size-8"
-                        @click="
-                            openConf = false;
-                            openInfo = true;
-                            password = '';
-                            oldPassOK = false;
-                        "
-                    />
+                <div class="flex justify-between items-center">
                     <span
-                        class="text-mm-white font-semibold text-xl tracking-wide"
+                        class="text-mm-white font-bold text-2xl tracking-wide"
                         >{{
-                            isDelete
-                                ? "BRISANJE RAČUNA POTREBNO POTVRDITI UNOSOM LOZINKE:"
-                                : oldPassOK
-                                  ? "NOVA LOZINKA"
-                                  : "STARA LOZINKA:"
+                            activeModal === "deleteAcc"
+                                ? "Brisanje računa"
+                                : "Promjena lozinke"
                         }}</span
                     >
+                    <X class="size-8" @click="openModal('info')" />
+                </div>
+                <hr class="border-mm-gray border" />
+                <div class="input-block">
+                    <span
+                        v-if="activeModal === 'deleteAcc'"
+                        class="text-mm-error text-sm"
+                        ><strong>UPOZORENJE:</strong> brisanjem računa trajno
+                        gubite pristup svom računu i podacima.
+                        <strong>Radnja je nepovratna.</strong> Za potvrdu
+                        unesite trenutnu lozinku.</span
+                    >
+                    <span class="input-label">{{
+                        activeModal === "deleteAcc"
+                            ? "UNOS LOZINKE:"
+                            : oldPassOK
+                              ? "NOVA LOZINKA:"
+                              : "STARA LOZINKA:"
+                    }}</span>
                     <div class="input-field">
                         <input
                             :class="{ 'text-mm-white': password.length }"
@@ -438,12 +431,16 @@
                 <div class="flex justify-center pt-3 relative">
                     <button
                         type="submit"
-                        :disabled="!password.length"
+                        :disabled="!password.length || checkPassword"
                         class="disabled:bg-mm-gray text-mm-lightnavy font-extrabold tracking-wider rounded-lg py-1.5 px-4"
-                        :class="isDelete ? 'bg-mm-error/80' : 'bg-mm-primary'"
+                        :class="
+                            activeModal === 'deleteAcc'
+                                ? 'bg-mm-error/80'
+                                : 'bg-mm-primary'
+                        "
                     >
                         {{
-                            isDelete
+                            activeModal === "deleteAcc"
                                 ? "Potvrda brisanja računa"
                                 : `Potvrda ${oldPassOK ? "nove" : "stare"} lozinke`
                         }}
@@ -457,17 +454,14 @@
                     >
                 </div>
             </form>
-        </div>
+        </ModalBase>
 
         <!-- Password-changed-success modal -->
-        <div
-            v-if="succPassChange"
-            class="bg-mm-dark/80 z-20 flex items-center justify-center px-8 fixed inset-0"
-            @click="succPassChange = false"
+        <ModalBase
+            v-if="activeModal === 'succPassChange'"
+            @click="openModal(null)"
         >
-            <div
-                class="bg-mm-lightnavy border border-mm-gray rounded-2xl p-6 text-mm-white w-full flex flex-col items-center gap-5"
-            >
+            <div class="flex flex-col items-center gap-5">
                 <SaveCheck class="size-20 stroke-1 text-mm-success" />
                 <hr class="border-mm-gray w-full" />
                 <div
@@ -478,7 +472,7 @@
                     <span>Klik na ekran za izlaz.</span>
                 </div>
             </div>
-        </div>
+        </ModalBase>
 
         <MobileNavbar class="fixed bottom-0 w-full z-10" />
     </div>

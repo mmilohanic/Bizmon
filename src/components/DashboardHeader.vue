@@ -13,7 +13,7 @@
     import { useRouter } from "vue-router";
 
     const router = useRouter();
-    const props = defineProps(["infoModal"]);
+    defineProps(["infoActive"]);
 
     const openMenu = ref(false);
 
@@ -42,10 +42,10 @@
             } else {
                 router.push(item.path);
             }
-        } catch (error) {
-            errorMessage.value = firebaseError(error.code);
-        } finally {
+
             openMenu.value = false;
+        } catch (error) {
+            alert(firebaseError(error.code));
         }
     }
 </script>
@@ -65,19 +65,16 @@
                     class="size-11 text-mm-gray p-1.5"
                     :class="{
                         'text-mm-primary bg-mm-lightnavy rounded-lg':
-                            props.infoModal,
+                            $props.infoActive,
                     }"
                     @click="
-                        $emit('triggerInfo', !props.infoModal);
+                        $emit('openInfo');
                         openMenu = false;
                     "
                 />
                 <Menu
                     class="size-11 text-mm-gray p-1.5"
-                    @click="
-                        openMenu = !openMenu;
-                        $emit('triggerInfo', false);
-                    "
+                    @click="openMenu = !openMenu"
                     :class="{
                         'text-mm-primary bg-mm-lightnavy rounded-lg': openMenu,
                     }"
