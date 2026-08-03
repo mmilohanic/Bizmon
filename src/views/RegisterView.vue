@@ -135,7 +135,6 @@
 
                 succReg.value = true;
             } catch (error) {
-                console.log(error);
                 regErr.value = firebaseError(error.code);
             }
         }

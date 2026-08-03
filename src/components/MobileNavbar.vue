@@ -5,7 +5,7 @@
 <template>
     <div class="h-20 bg-mm-navy flex justify-around items-center">
         <router-link
-            v-for="(item, idx) in doctypesData"
+            v-for="(item, idx) in doctypesData.filter((i) => !i.menuItem)"
             :to="item.path"
             class="text-mm-gray size-16.5"
             :class="{

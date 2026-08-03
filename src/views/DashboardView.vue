@@ -37,7 +37,7 @@
     const normalLogin =
         loggedUser.value.providerData[0].providerId === "password";
 
-    defineEmits(["openInfo"]);
+    defineEmits(["openInfo", "exit"]);
 
     const options = [
         "ovaj mjesec",
@@ -257,7 +257,7 @@
                 <div class="flex flex-col">
                     <div
                         v-for="(item, idx) in doctypesData.filter(
-                            (item) => item.label != 'Početna',
+                            (i) => i.label != 'Početna' && !i.menuItem,
                         )"
                         class="flex py-2 first:pt-1 last:pb-0 pe-1 items-end justify-between not-first:border-t not-first:border-mm-gray font-semibold"
                         :key="idx"
@@ -320,13 +320,13 @@
             </div>
         </div>
 
-        <!-- User modal -->
-        <ModalBase v-if="activeModal === 'info'" @click="openModal(null)">
-            <div class="flex justify-between items-center">
-                <span class="text-2xl">O računu</span>
-                <X class="size-8" @click="openModal(null)" />
-            </div>
-            <hr class="border-mm-gray border my-4" />
+        <!-- Info modal -->
+        <ModalBase
+            v-if="activeModal === 'info'"
+            @click="openModal(null)"
+            title="O računu"
+            @exit="openModal(null)"
+        >
             <div class="flex flex-col gap-2 px-1">
                 <span class="text-2xl">{{ loggedUser.displayName }}</span>
                 <span class="text-lg font-extralight">{{
@@ -343,7 +343,7 @@
             </div>
             <hr class="border-mm-gray border my-4" />
             <div
-                class="flex px-1 relative"
+                class="flex px-1 relative pt-2"
                 :class="normalLogin ? 'justify-between' : 'justify-center pt-3'"
             >
                 <button
@@ -351,7 +351,7 @@
                     @click="openModal('changePass')"
                     class="text-mm-primary font-bold py-1.5 px-1 border rounded-lg"
                 >
-                    Promijeni lozinku
+                    Promjena lozinke
                 </button>
                 <button
                     @click="
@@ -371,10 +371,16 @@
             </div>
         </ModalBase>
 
-        <!-- Conformation modal -->
+        <!-- Modal potvrde izmjene lozinke i brisanja računa -->
         <ModalBase
             v-if="['changePass', 'deleteAcc'].includes(activeModal)"
             @click="openModal('info')"
+            :title="
+                activeModal === 'deleteAcc'
+                    ? 'Brisanje računa'
+                    : 'Promjena lozinke'
+            "
+            @exit="openModal('info')"
         >
             <form
                 @submit.prevent="
@@ -384,18 +390,6 @@
                 "
                 class="flex flex-col gap-4"
             >
-                <div class="flex justify-between items-center">
-                    <span
-                        class="text-mm-white font-bold text-2xl tracking-wide"
-                        >{{
-                            activeModal === "deleteAcc"
-                                ? "Brisanje računa"
-                                : "Promjena lozinke"
-                        }}</span
-                    >
-                    <X class="size-8" @click="openModal('info')" />
-                </div>
-                <hr class="border-mm-gray border" />
                 <div class="input-block">
                     <span
                         v-if="activeModal === 'deleteAcc'"
@@ -456,10 +450,11 @@
             </form>
         </ModalBase>
 
-        <!-- Password-changed-success modal -->
+        <!-- Modal uspješne promjene lozinke -->
         <ModalBase
             v-if="activeModal === 'succPassChange'"
             @click="openModal(null)"
+            :hide-title="true"
         >
             <div class="flex flex-col items-center gap-5">
                 <SaveCheck class="size-20 stroke-1 text-mm-success" />
