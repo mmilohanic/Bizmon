@@ -15,16 +15,38 @@
     --font-sans: "Inter Variable", sans-serif;
 }
 
-.input-block {
+.main-container {
     @apply flex flex-col gap-4;
 }
 
-.input-label {
+.log-reg-label {
     @apply text-mm-gray text-xl font-extrabold tracking-wide;
 }
 
-.input-field {
+.log-reg-field {
     @apply bg-mm-navy text-mm-gray flex gap-3 items-center text-lg px-2.5 py-2 rounded-xl;
+}
+
+.input-block-v {
+    @apply flex flex-col gap-4;
+}
+
+.input-block-h {
+    @apply flex justify-between items-center;
+}
+
+.input-label {
+    @apply text-mm-white text-xl font-semibold tracking-wide;
+}
+
+.input-field {
+    @apply bg-mm-navy rounded-xl px-2.5 py-2;
+    @apply text-mm-white placeholder:text-mm-gray text-lg;
+}
+
+.confirm-btn {
+    @apply bg-mm-primary rounded-full py-1.5 px-10 w-fit mx-auto;
+    @apply text-mm-dark disabled:bg-mm-gray font-extrabold tracking-wider;
 }
 
 html,

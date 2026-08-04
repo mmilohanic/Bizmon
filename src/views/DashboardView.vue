@@ -37,8 +37,6 @@
     const normalLogin =
         loggedUser.value.providerData[0].providerId === "password";
 
-    defineEmits(["openInfo", "exit"]);
-
     const options = [
         "ovaj mjesec",
         "zadnji mjesec",
@@ -227,7 +225,7 @@
                     <div class="relative w-35">
                         <div
                             class="flex bg-mm-white text-black ps-2 pe-1 py-0.5 rounded justify-between"
-                            :class="{ 'rounded-bl-none rounded-br-none': open }"
+                            :class="{ 'rounded-b-none': open }"
                             @click="open = !open"
                         >
                             <span>{{ selected }}</span>
@@ -236,7 +234,7 @@
 
                         <ul
                             v-if="open"
-                            class="absolute w-full bg-mm-white text-black rounded-bl rounded-br"
+                            class="absolute w-full bg-mm-white text-black rounded-b"
                         >
                             <li
                                 v-for="(option, idx) in options.filter(
@@ -390,7 +388,7 @@
                 "
                 class="flex flex-col gap-4"
             >
-                <div class="input-block">
+                <div class="input-block-v">
                     <span
                         v-if="activeModal === 'deleteAcc'"
                         class="text-mm-error text-sm"
@@ -399,19 +397,19 @@
                         <strong>Radnja je nepovratna.</strong> Za potvrdu
                         unesite trenutnu lozinku.</span
                     >
-                    <span class="input-label">{{
+                    <span class="input-label font-bold">{{
                         activeModal === "deleteAcc"
                             ? "UNOS LOZINKE:"
                             : oldPassOK
                               ? "NOVA LOZINKA:"
                               : "STARA LOZINKA:"
                     }}</span>
-                    <div class="input-field">
+                    <div class="log-reg-field">
                         <input
                             :class="{ 'text-mm-white': password.length }"
                             :type="viewPass ? 'text' : 'password'"
                             placeholder="Unesi lozinku..."
-                            class="w-full"
+                            class="w-full px-1"
                             v-model="password"
                         />
                         <component

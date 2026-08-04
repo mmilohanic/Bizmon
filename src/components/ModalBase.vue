@@ -18,11 +18,11 @@
             @click.stop
             class="bg-mm-lightnavy border border-mm-gray rounded-2xl p-6 text-mm-white w-full"
         >
-            <div v-if="!props.hideTitle">
+            <div v-if="!hideTitle">
                 <div class="flex justify-between items-center">
                     <span
                         class="text-2xl text-mm-white font-bold tracking-wide"
-                        >{{ $props.title }}</span
+                        >{{ title }}</span
                     >
                     <X class="size-8" @click="$emit('exit')" />
                 </div>

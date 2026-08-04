@@ -4,12 +4,7 @@ import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { auth, loggedUser } from "@/firebase";
-import QuotesView from "@/views/QuotesView.vue";
-import OrdersView from "@/views/OrdersView.vue";
-import WorkOrdersView from "@/views/WorkOrdersView.vue";
-import ClientsView from "@/views/ClientsView.vue";
-import ItemsView from "@/views/ItemsView.vue";
-import InvoicesView from "@/views/InvoicesView.vue";
+import DocumentsView from "@/views/DocumentsView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,32 +27,32 @@ const router = createRouter({
         {
             path: "/quotes",
             name: "quotes",
-            component: QuotesView,
+            component: DocumentsView,
         },
         {
             path: "/orders",
             name: "orders",
-            component: OrdersView,
+            component: DocumentsView,
         },
         {
             path: "/work-orders",
             name: "work-orders",
-            component: WorkOrdersView,
+            component: DocumentsView,
         },
         {
             path: "/invoices",
             name: "invoices",
-            component: InvoicesView,
+            component: DocumentsView,
         },
         {
             path: "/items",
             name: "items",
-            component: ItemsView,
+            component: DocumentsView,
         },
         {
             path: "/clients",
             name: "clients",
-            component: ClientsView,
+            component: DocumentsView,
         },
         {
             path: "/:pathMatch(.*)*",

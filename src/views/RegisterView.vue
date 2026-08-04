@@ -160,22 +160,22 @@
             @submit.prevent="registerUser()"
             class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
         >
-            <div v-for="item in loginData" class="input-block">
+            <div v-for="item in loginData" class="main-container">
                 <div
                     v-if="item.label.includes('LOZINKA')"
                     class="flex justify-between items-center"
                 >
-                    <span class="input-label">{{ item.label }}</span>
+                    <span class="log-reg-label">{{ item.label }}</span>
                     <span class="text-mm-gray text-sm">min. 8 znakova</span>
                 </div>
-                <span v-else class="input-label">{{ item.label }}</span>
-                <div class="input-field relative">
+                <span v-else class="log-reg-label">{{ item.label }}</span>
+                <div class="log-reg-field relative">
                     <component :is="item.icon" size="30" />
                     <input
                         :class="{ 'text-mm-white': item.data.value }"
                         :type="item.type"
                         :placeholder="item.placeholder"
-                        class="w-full"
+                        class="w-full px-1"
                         v-model="item.data.value"
                         @blur="
                             if (!item.label.includes('PONOVI'))
@@ -193,7 +193,7 @@
                 <button
                     :disabled="!allValid"
                     type="submit"
-                    class="bg-mm-primary text-mm-dark disabled:bg-mm-gray text-lg font-extrabold flex items-center w-fit py-2 px-8 rounded-full"
+                    class="confirm-btn text-lg flex items-center py-2!"
                 >
                     REGISTRIRAJ SE
                 </button>
@@ -221,7 +221,7 @@
             </div>
             <button
                 @click="logIn()"
-                class="bg-mm-primary text-mm-dark text-lg font-extrabold flex items-center w-fit mx-auto py-2 px-15 rounded-full"
+                class="confirm-btn text-lg flex items-center"
             >
                 NASTAVI
             </button>

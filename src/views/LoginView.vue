@@ -105,15 +105,15 @@
             @submit.prevent="logIn()"
             class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
         >
-            <div v-for="item in loginData" class="input-block">
-                <span class="input-label">{{ item.label }}</span>
-                <div class="input-field">
+            <div v-for="item in loginData" class="main-container">
+                <span class="log-reg-label">{{ item.label }}</span>
+                <div class="log-reg-field">
                     <component :is="item.icon" size="30" />
                     <input
                         :class="{ 'text-mm-white': item.data.value }"
                         :type="item.type"
                         :placeholder="item.placeholder"
-                        class="w-full"
+                        class="w-full px-1"
                         v-model="item.data.value"
                     />
                 </div>
@@ -126,16 +126,12 @@
             </div>
             <div class="flex flex-col gap-6 max-w-50 mx-auto">
                 <button
-                    class="bg-mm-primary flex place-content-center py-1.5 rounded-full"
+                    class="confirm-btn flex gap-3 place-items-center text-lg"
                     :disabled="!(email && password)"
                     type="submit"
                 >
-                    <div
-                        class="text-mm-dark text-lg font-extrabold flex gap-3 items-center"
-                    >
-                        <span>PRIJAVA</span>
-                        <ArrowRight />
-                    </div>
+                    <span>PRIJAVA</span>
+                    <ArrowRight />
                 </button>
                 <GoogleButton @click="signInWithGoogle()" />
             </div>

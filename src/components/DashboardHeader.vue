@@ -48,7 +48,7 @@
                     class="size-11 text-mm-gray p-1.5"
                     :class="{
                         'text-mm-primary bg-mm-lightnavy rounded-lg':
-                            $props.infoActive,
+                            infoActive,
                     }"
                     @click="
                         $emit('openInfo');
