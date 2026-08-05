@@ -73,6 +73,7 @@
             label: "IME I PREZIME:",
             icon: IdCard,
             type: "text",
+            inputmode: "text",
             placeholder: "npr. Pero Perić",
             data: username,
             rules: checkUsername,
@@ -82,6 +83,7 @@
             label: "E-MAIL:",
             icon: AtSign,
             type: "email",
+            inputmode: "email",
             placeholder: "npr. test.mail@domain.org",
             data: email,
             rules: checkEmail,
@@ -91,6 +93,7 @@
             label: "LOZINKA:",
             icon: KeyRound,
             type: "password",
+            inputmode: "text",
             placeholder: "• • • • • • • •",
             data: password,
             rules: checkPassword,
@@ -100,6 +103,7 @@
             label: "PONOVI LOZINKU:",
             icon: Repeat2,
             type: "password",
+            inputmode: "text",
             placeholder: "• • • • • • • •",
             data: repeated,
             rules: checkRepetedPass,
@@ -174,6 +178,7 @@
                     <input
                         :class="{ 'text-mm-white': item.data.value }"
                         :type="item.type"
+                        :inputmode="item.inputmode"
                         :placeholder="item.placeholder"
                         class="w-full px-1"
                         v-model="item.data.value"

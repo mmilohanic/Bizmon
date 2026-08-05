@@ -30,6 +30,7 @@
             label: "E-MAIL:",
             icon: AtSign,
             type: "email",
+            inputmode: "email",
             placeholder: "npr. test.mail@domain.org",
             data: email,
         },
@@ -37,6 +38,7 @@
             label: "LOZINKA:",
             icon: KeyRound,
             type: "password",
+            inputmode: "text",
             placeholder: "• • • • • • • •",
             data: password,
         },
@@ -112,6 +114,7 @@
                     <input
                         :class="{ 'text-mm-white': item.data.value }"
                         :type="item.type"
+                        :inputmode="item.inputmode"
                         :placeholder="item.placeholder"
                         class="w-full px-1"
                         v-model="item.data.value"

@@ -11,25 +11,46 @@
 
 <template>
     <div class="main-container">
-        <div class="flex justify-between items-center px-1">
-            <span class="input-label">CIJENA:</span>
+        <div class="info-block">
+            <span class="input-label">OIB:</span>
+            <span class="text-lg">{{ selected.oib }}</span>
+        </div>
+        <div class="info-block">
+            <span class="input-label">TELEFON:</span>
+            <span class="text-lg">{{ selected.phone ?? "/" }}</span>
+        </div>
+        <div class="info-block">
+            <span class="input-label">E-MAIL:</span>
+            <div
+                v-if="selected.email && selected.email.length > 18"
+                class="flex flex-col items-end"
+            >
+                <span class="text-lg">{{
+                    selected.email.slice(0, selected.email.indexOf("@"))
+                }}</span>
+                <span class="text-lg">{{
+                    selected.email.slice(selected.email.indexOf("@"))
+                }}</span>
+            </div>
+            <span v-else>{{ selected.email ?? "/" }}</span>
+        </div>
+        <div class="info-block">
+            <span class="input-label">ADRESA:</span>
             <span class="text-lg">{{
-                selected.price + " €/" + selected.unit
+                selected.street + " " + selected.street_num
             }}</span>
         </div>
-        <div
-            class="flex px-1"
-            :class="
-                selected.description && selected.description.length > 18
-                    ? 'flex-col gap-2'
-                    : 'justify-between'
-            "
-        >
-            <span class="input-label">OPIS:</span>
-            <span class="ps-4 text-lg">{{
-                selected.description ?? "Nema opisa"
+        <div class="info-block">
+            <span class="input-label">MJESTO:</span>
+            <span class="text-lg">{{
+                selected.town + ", " + selected.zip
             }}</span>
         </div>
+        <div class="info-block">
+            <span class="input-label">DRŽAVA:</span>
+            <span class="text-lg">{{ selected.country }}</span>
+        </div>
+
         <hr class="border-mm-gray border" />
         <div class="flex justify-center px-1 relative pt-3">
             <div class="flex gap-4 justify-between w-full">
@@ -37,7 +58,7 @@
                     @click="emit('edit')"
                     class="text-mm-primary font-bold py-1.5 border rounded-lg w-1/2"
                 >
-                    Uredi artikl
+                    Uredi klijenta
                 </button>
                 <button
                     @click="
@@ -52,7 +73,7 @@
                             : 'border border-mm-error text-mm-error font-bold'
                     "
                 >
-                    Obriši artikl
+                    Obriši klijenta
                 </button>
             </div>
             <span
@@ -67,3 +88,11 @@
         </div>
     </div>
 </template>
+
+<style scoped>
+    @reference "@/assets/main.css";
+
+    .info-block {
+        @apply flex justify-between items-center px-1;
+    }
+</style>
