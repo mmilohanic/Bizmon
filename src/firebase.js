@@ -1,6 +1,18 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import {
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    getDoc,
+    getDocs,
+    getFirestore,
+    orderBy,
+    query,
+    updateDoc,
+    where,
+} from "firebase/firestore";
 import { ref } from "vue";
 
 const firebaseConfig = {
@@ -25,4 +37,45 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-export { auth, db, loggedUser };
+async function createDocument(collName, data) {
+    data["ownerId"] = loggedUser.value.uid;
+    await addDoc(collection(db, collName), data);
+}
+
+async function readCollection(name, sortBy, dir) {
+    const data = await getDocs(
+        query(
+            collection(db, name),
+            where("ownerId", "==", loggedUser.value.uid),
+            orderBy(sortBy, dir),
+        ),
+    );
+
+    return data.docs.map((d) => Object.assign(d.data(), { id: d.id }));
+}
+
+async function readDocument(collName, docId) {
+    const data = await getDoc(doc(db, collName, docId));
+
+    return data.exists()
+        ? data.docs.map((d) => Object.assign(d.data(), { id: d.id }))
+        : null;
+}
+
+async function updateDocument(collName, data, docId) {
+    await updateDoc(doc(db, collName, docId), data);
+}
+
+async function deleteDocument(collName, docId) {
+    await deleteDoc(doc(db, collName, docId));
+}
+
+export {
+    auth,
+    db,
+    loggedUser,
+    readCollection,
+    createDocument,
+    updateDocument,
+    deleteDocument,
+};

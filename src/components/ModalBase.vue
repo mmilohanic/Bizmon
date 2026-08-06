@@ -21,7 +21,7 @@
             <div v-if="!hideTitle">
                 <div class="flex justify-between items-center">
                     <span
-                        class="text-2xl text-mm-white font-bold tracking-wide"
+                        class="text-2xl text-mm-white font-bold tracking-wide truncate"
                         >{{ title }}</span
                     >
                     <X class="size-8" @click="$emit('exit')" />

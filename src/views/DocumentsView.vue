@@ -1,65 +1,18 @@
 <script setup>
-    import AddEditClientForm from "@/components/AddEditClientForm.vue";
-    import AddEditItemForm from "@/components/AddEditItemForm.vue";
-    import ClientInfo from "@/components/ClientInfo.vue";
     import DashboardHeader from "@/components/DashboardHeader.vue";
-    import ItemInfo from "@/components/ItemInfo.vue";
     import MobileNavbar from "@/components/MobileNavbar.vue";
     import ModalBase from "@/components/ModalBase.vue";
     import firebaseError from "@/data/errorsData";
-    import { db, loggedUser } from "@/firebase";
-    import { Info, LoaderCircle, Plus, SaveCheck } from "@lucide/vue";
+    import routesData from "@/data/routesData";
     import {
-        addDoc,
-        collection,
-        deleteDoc,
-        doc,
-        getDocs,
-        orderBy,
-        query,
-        updateDoc,
-        where,
-    } from "firebase/firestore";
+        createDocument,
+        deleteDocument,
+        readCollection,
+        updateDocument,
+    } from "@/firebase";
+    import { Info, LoaderCircle, Plus, SaveCheck } from "@lucide/vue";
     import { onMounted, ref } from "vue";
     import { useRoute } from "vue-router";
-
-    const infoMsgs = {
-        items: {
-            none: "Nema artikala",
-            succ: "Artikl je uspješno unesen.",
-        },
-        clients: {
-            none: "Nema klijenata",
-            succ: "Klijent je uspješno unesen.",
-        },
-        quotes: {
-            none: "Nema ponuda",
-            succ: "Ponuda je uspješno unesena.",
-        },
-        orders: {
-            none: "Nema narudžbi",
-            succ: "Narudžba je uspješno unesena.",
-        },
-        "work-orders": {
-            none: "Nema radnih naloga",
-            succ: "Radni nalog je uspješno unesen.",
-        },
-        invoices: {
-            none: "Nema računa",
-            succ: "Račun je uspješno unesen.",
-        },
-    };
-
-    const modalTitles = {
-        items: {
-            add: "Unos artikla",
-            edit: "Uredi artikl",
-        },
-        clients: {
-            add: "Unos klijenta",
-            edit: "Uredi klijenta",
-        },
-    };
 
     const route = useRoute();
 
@@ -81,39 +34,29 @@
         );
     }
 
-    async function addItem(item) {
+    async function addData(item) {
         errMsg.value = null;
         try {
             item = handleBlanks(item);
-            item["owner"] = loggedUser.value.uid;
-            await addDoc(collection(db, route.name), item);
+            await createDocument(route.name, item);
+
             openModal("succ");
-            await getItems();
+            await getData();
         } catch (error) {
             errMsg.value = firebaseError(error.code);
         }
     }
 
-    async function getItems(collectionName = route.name) {
+    async function getData(name = route.name, sortBy = "name", dir = "asc") {
         try {
-            const data = await getDocs(
-                query(
-                    collection(db, collectionName),
-                    where("owner", "==", loggedUser.value.uid),
-                    orderBy("name", "asc"),
-                ),
-            );
-
-            items.value = data.docs.map((d) =>
-                Object.assign(d.data(), { id: d.id }),
-            );
+            items.value = await readCollection(name, sortBy, dir);
         } catch (error) {
             alert(firebaseError(error));
             console.log(error);
         }
     }
 
-    async function editItem(item) {
+    async function editData(item) {
         const changedItems = handleBlanks(
             Object.fromEntries(
                 Object.entries(item).filter(
@@ -123,32 +66,34 @@
         );
 
         try {
-            await updateDoc(
-                doc(db, route.name, selected.value.id),
-                changedItems,
-            );
+            await updateDocument(route.name, changedItems, selected.value.id);
             openModal(null);
-            await getItems();
+            await getData();
         } catch (error) {
             errMsg.value = firebaseError(error.code);
         }
     }
 
-    async function delItem() {
+    async function delData() {
         errMsg.value = null;
 
         try {
-            await deleteDoc(doc(db, route.name, selected.value.id));
+            await deleteDocument(route.name, selected.value.id);
             openModal(null);
-            await getItems();
+            await getData();
         } catch (error) {
             errMsg.value = firebaseError(error.code);
         }
+    }
+
+    function statusStyle(status) {
+        const color = routesData[route.name].status[status];
+        return `border-mm-${color} text-mm-${color}`;
     }
 
     onMounted(async () => {
         loading.value = true;
-        await getItems();
+        await getData();
         loading.value = false;
     });
 </script>
@@ -184,79 +129,93 @@
                 v-if="!(loading || items.length)"
                 class="w-full h-full text-mm-white flex flex-col justify-center items-center text-2xl"
             >
-                <span>{{ infoMsgs[route.name].none }}</span>
+                <span>{{ routesData[route.name].infoMsgs.none }}</span>
                 <span>za prikazivanje</span>
             </div>
 
-            <!-- Učitavanje artikala i klijenata -->
+            <!-- Učitavanje kartica -->
             <div
-                v-if="['items', 'clients'].includes(route.name)"
-                v-for="item in items"
-                class="bg-mm-lightnavy rounded-2xl p-4 flex flex-col gap-2"
-                :key="item.id"
+                v-for="(item, idx) in items"
+                class="bg-mm-lightnavy rounded-2xl p-4"
+                :key="idx"
             >
-                <div class="flex justify-between items-center">
-                    <span class="text-mm-white text-xl font-medium">{{
-                        item.name
-                    }}</span>
-                    <Info
-                        @click="openModal('info', item)"
-                        class="text-mm-neutral"
-                    />
-                </div>
-                <hr v-if="route.name === 'items'" class="text-mm-gray" />
+                <!-- Učitavanje artikala i klijenata -->
                 <div
-                    v-if="route.name === 'items'"
-                    class="flex justify-between items-center text-mm-gray font-semibold"
+                    v-if="['items', 'clients'].includes(route.name)"
+                    class="flex flex-col gap-2"
                 >
-                    <span>Jedinična cijena:</span>
-                    <span>{{ item.price + " €/" + item.unit }}</span>
+                    <div class="separate-and-center">
+                        <span class="text-mm-white text-xl font-medium">{{
+                            item.name
+                        }}</span>
+                        <Info
+                            @click="openModal('info', item)"
+                            class="text-mm-neutral"
+                        />
+                    </div>
+                    <hr v-if="route.name === 'items'" class="text-mm-gray" />
+                    <div
+                        v-if="route.name === 'items'"
+                        class="separate-and-center text-mm-gray font-semibold"
+                    >
+                        <span>Jedinična cijena:</span>
+                        <span>{{ item.price + " €/" + item.unit }}</span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Učitavanje dokumenata -->
-            <div
-                v-if="
-                    ['qoutes', 'orders', 'work-orders', 'invoices'].includes(
-                        route.name,
-                    )
-                "
-                v-for="item in items"
-                class="bg-mm-lightnavy rounded-2xl p-4 flex flex-col gap-2"
-                :key="item.id"
-            >
-                <div class="flex justify-between items-center">
-                    <span class="text-mm-white text-xl font-medium">{{
-                        item.name
-                    }}</span>
-                    <Info
-                        @click="openModal('info', item)"
-                        class="text-mm-neutral"
-                    />
-                </div>
-                <hr v-if="route.name === 'items'" class="text-mm-gray" />
+                <!-- Učitavanje dokumenata -->
                 <div
-                    v-if="route.name === 'items'"
-                    class="flex justify-between items-center text-mm-gray font-semibold"
+                    v-if="
+                        [
+                            'quotes',
+                            'orders',
+                            'work-orders',
+                            'invoices',
+                        ].includes(route.name)
+                    "
+                    class="flex flex-col gap-2"
                 >
-                    <span>Jedinična cijena:</span>
-                    <span>{{ item.price + " €/" + item.unit }}</span>
+                    <div class="separate-and-center">
+                        <span class="text-mm-white text-xl font-medium">{{
+                            item.name
+                        }}</span>
+                        <Info
+                            @click="openModal('info', item)"
+                            class="text-mm-neutral"
+                        />
+                    </div>
+                    <hr class="text-mm-gray" />
+                    <div class="separate-and-center text-mm-gray font-semibold">
+                        <span>Kreirano:</span>
+                        <span>{{
+                            item.createdAt.toDate().toLocaleDateString("hr-HR")
+                        }}</span>
+                    </div>
+                    <div class="separate-and-center">
+                        <span class="text-mm-gray font-semibold">Status:</span>
+                        <span
+                            class="border rounded-full px-2"
+                            :class="statusStyle(item.status)"
+                            >{{ item.status }}</span
+                        >
+                    </div>
+                    <div class="separate-and-center text-mm-gray font-semibold">
+                        <span>Vrijednost:</span>
+                        <span>{{ Number(item.total).toFixed(2) }} €</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal za unos i izmjenu artikla i klijenata -->
+        <!-- Modal za unos i izmjenu artikla, klijenta i dokumenta -->
         <ModalBase
-            v-if="
-                ['add', 'edit'].includes(activeModal) &&
-                ['items', 'clients'].includes(route.name)
-            "
+            v-if="['add', 'edit'].includes(activeModal)"
             @click="
                 activeModal === 'edit'
                     ? openModal('info', selected)
                     : openModal(null)
             "
-            :title="modalTitles[route.name][activeModal]"
+            :title="routesData[route.name].modalTitles[activeModal]"
             @exit="
                 activeModal === 'edit'
                     ? openModal('info', selected)
@@ -264,33 +223,28 @@
             "
         >
             <component
-                :is="
-                    route.name === 'items' ? AddEditItemForm : AddEditClientForm
-                "
+                :is="routesData[route.name].addEditModal"
                 :err-msg="errMsg"
                 :is-edit="activeModal === 'edit'"
                 :selected="selected"
-                @add="(item) => addItem(item)"
-                @edit="(item) => editItem(item)"
+                @add="(item) => addData(item)"
+                @edit="(item) => editData(item)"
             />
         </ModalBase>
 
         <!-- Modal za info artikla i klijenata -->
         <ModalBase
-            v-if="
-                activeModal === 'info' &&
-                ['items', 'clients'].includes(route.name)
-            "
+            v-if="activeModal === 'info'"
             @click="openModal(null)"
             :title="selected.name"
             @exit="openModal(null)"
         >
             <component
-                :is="route.name === 'items' ? ItemInfo : ClientInfo"
+                :is="routesData[route.name].infoModal"
                 v-model="errMsg"
                 :selected="selected"
                 @edit="openModal('edit', selected)"
-                @delete="delItem()"
+                @delete="delData()"
             />
         </ModalBase>
 
@@ -304,9 +258,9 @@
                 <SaveCheck class="size-20 stroke-1 text-mm-success" />
                 <hr class="border-mm-gray w-full" />
                 <div
-                    class="text-2xl text-mm-white flex flex-col items-center font-extralight"
+                    class="text-2xl text-mm-white flex flex-col items-center font-extralight text-center"
                 >
-                    <span>{{ infoMsgs[route.name].succ }}</span>
+                    <span>{{ routesData[route.name].infoMsgs.succ }}</span>
                     <span>Klik izvan okvira za izlaz.</span>
                 </div>
             </div>

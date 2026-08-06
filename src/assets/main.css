@@ -7,10 +7,11 @@
     --color-mm-lightnavy: #1b2436;
     --color-mm-primary: #30a8fc;
     --color-mm-white: #e7eef8;
+    --color-mm-muted: #a4b0c4;
     --color-mm-gray: #6b768d;
     --color-mm-success: #3ec97a;
     --color-mm-error: #ff4d67;
-    --color-mm-warning: #ffd942;
+    --color-mm-warning: #e0bc2f;
     --color-mm-neutral: #3b82f6;
     --font-sans: "Inter Variable", sans-serif;
 }
@@ -47,6 +48,10 @@
 .confirm-btn {
     @apply bg-mm-primary rounded-full py-1.5 px-10 w-fit mx-auto;
     @apply text-mm-dark disabled:bg-mm-gray font-extrabold tracking-wider;
+}
+
+.separate-and-center {
+    @apply flex justify-between items-center px-1;
 }
 
 html,

@@ -1,4 +1,5 @@
 <script setup>
+    import { Copy } from "@lucide/vue";
     import { ref } from "vue";
 
     const props = defineProps({
@@ -7,48 +8,66 @@
     const emit = defineEmits(["edit", "delete"]);
     const delAttempt = ref(false);
     const errMsg = defineModel("errMsg");
+
+    function copy(text) {
+        navigator.clipboard.writeText(text);
+    }
 </script>
 
 <template>
     <div class="main-container">
-        <div class="info-block">
+        <div class="separate-and-center">
             <span class="input-label">OIB:</span>
-            <span class="text-lg">{{ selected.oib }}</span>
+            <span class="info-text">{{ selected.oib }}</span>
         </div>
-        <div class="info-block">
+        <div class="separate-and-center">
             <span class="input-label">TELEFON:</span>
-            <span class="text-lg">{{ selected.phone ?? "/" }}</span>
+            <span class="info-text">{{ selected.phone ?? "/" }}</span>
         </div>
-        <div class="info-block">
-            <span class="input-label">E-MAIL:</span>
-            <div
-                v-if="selected.email && selected.email.length > 18"
-                class="flex flex-col items-end"
-            >
-                <span class="text-lg">{{
-                    selected.email.slice(0, selected.email.indexOf("@"))
-                }}</span>
-                <span class="text-lg">{{
-                    selected.email.slice(selected.email.indexOf("@"))
-                }}</span>
+        <div class="separate-and-center">
+            <div class="flex gap-2">
+                <span class="input-label">E-MAIL:</span>
+                <button @click="copy(selected.email)">
+                    <Copy class="size-5" />
+                </button>
             </div>
-            <span v-else>{{ selected.email ?? "/" }}</span>
+            <span v-if="!selected.email">/</span>
+            <div v-else class="flex flex-col underline">
+                <a
+                    :href="`mailto:${selected.email}`"
+                    class="info-text truncate"
+                    >{{
+                        selected.email.length > 15
+                            ? selected.email.slice(
+                                  0,
+                                  selected.email.indexOf("@"),
+                              )
+                            : selected.email
+                    }}</a
+                ><span
+                    v-if="selected.email.length > 15"
+                    class="info-text truncate"
+                    >{{
+                        selected.email.slice(selected.email.indexOf("@"))
+                    }}</span
+                >
+            </div>
         </div>
-        <div class="info-block">
+        <div class="separate-and-center">
             <span class="input-label">ADRESA:</span>
-            <span class="text-lg">{{
+            <span class="info-text">{{
                 selected.street + " " + selected.street_num
             }}</span>
         </div>
-        <div class="info-block">
+        <div class="separate-and-center">
             <span class="input-label">MJESTO:</span>
-            <span class="text-lg">{{
+            <span class="info-text">{{
                 selected.town + ", " + selected.zip
             }}</span>
         </div>
-        <div class="info-block">
+        <div class="separate-and-center">
             <span class="input-label">DRŽAVA:</span>
-            <span class="text-lg">{{ selected.country }}</span>
+            <span class="info-text">{{ selected.country }}</span>
         </div>
 
         <hr class="border-mm-gray border" />
@@ -92,7 +111,15 @@
 <style scoped>
     @reference "@/assets/main.css";
 
-    .info-block {
-        @apply flex justify-between items-center px-1;
+    .separate-and-center {
+        @apply gap-5;
+    }
+
+    .input-label {
+        @apply text-nowrap;
+    }
+
+    .info-text {
+        @apply text-lg text-right line-clamp-2 max-w-40;
     }
 </style>
