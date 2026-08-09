@@ -2,14 +2,24 @@
     import doctypesData from "@/data/doctypesData";
     import firebaseError from "@/data/errorsData";
     import { auth } from "@/firebase";
-    import { Component, LogOut, Menu, User } from "@lucide/vue";
+    import {
+        ArrowLeft,
+        Component,
+        Download,
+        LogOut,
+        Menu,
+        User,
+    } from "@lucide/vue";
     import { signOut } from "firebase/auth";
     import { ref } from "vue";
     import { useRoute, useRouter } from "vue-router";
 
     const router = useRouter();
     const route = useRoute();
-    defineProps(["infoActive"]);
+    defineProps({
+        infoActive: Boolean,
+        docTitle: String,
+    });
 
     const openMenu = ref(false);
 
@@ -29,8 +39,14 @@
 </script>
 
 <template>
-    <div>
-        <div class="h-20 bg-mm-navy flex items-center justify-between px-6">
+    <div class="bg-mm-navy">
+        <div class="h-20 flex items-center justify-between gap-3 px-6">
+            <RouterLink
+                v-if="route.params.id"
+                :to="{ name: route.meta.parentName }"
+            >
+                <ArrowLeft class="header-icon" />
+            </RouterLink>
             <span
                 v-if="route.name === 'dashboard'"
                 class="text-5xl font-extrabold"
@@ -39,13 +55,21 @@
                 <span class="text-mm-white">BIZ</span>
                 <span class="text-mm-primary">MON</span>
             </span>
-            <span v-else class="text-mm-white text-4xl font-medium">
-                {{ doctypesData.find((x) => x.path === route.path).label }}
+            <span
+                v-else
+                class="text-mm-white font-medium truncate"
+                :class="route.params.id ? 'text-2xl' : 'text-4xl'"
+            >
+                {{
+                    route.params.id
+                        ? docTitle
+                        : doctypesData.find((x) => x.path === route.path).label
+                }}
             </span>
             <div class="flex items-center gap-1">
                 <User
                     v-if="route.name === 'dashboard'"
-                    class="size-11 text-mm-gray p-1.5"
+                    class="header-icon"
                     :class="{
                         'text-mm-primary bg-mm-lightnavy rounded-lg':
                             infoActive,
@@ -55,8 +79,13 @@
                         openMenu = false;
                     "
                 />
+                <Download
+                    v-if="route.params.id"
+                    class="header-icon text-mm-success!"
+                />
                 <Menu
-                    class="size-11 text-mm-gray p-1.5"
+                    v-else
+                    class="header-icon"
                     @click="openMenu = !openMenu"
                     :class="{
                         'text-mm-primary bg-mm-lightnavy rounded-lg': openMenu,
@@ -66,7 +95,7 @@
         </div>
         <div v-if="openMenu">
             <div
-                class="flex border-t border-b shadow-xl shadow-mm-dark border-mm-gray bg-mm-navy text-mm-white text-xl py-2"
+                class="flex border-t border-b shadow-xl shadow-mm-dark border-mm-gray text-mm-white text-xl py-2"
             >
                 <component
                     v-for="(item, idx) in doctypesData
@@ -85,3 +114,11 @@
         </div>
     </div>
 </template>
+
+<style scoped>
+    @reference '@/assets/main.css';
+
+    .header-icon {
+        @apply size-11 text-mm-gray p-1.5;
+    }
+</style>

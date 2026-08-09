@@ -38,9 +38,7 @@
 
     onMounted(() => {
         if (props.isEdit && props.selected)
-            Object.keys(itemsForm).map(
-                (key) => (itemsForm[key] = props.selected[key]),
-            );
+            Object.assign(itemsForm, props.selected);
     });
 </script>
 

@@ -1,10 +1,20 @@
 import DashboardView from "@/views/DashboardView.vue";
+import DocumentView from "@/views/DocumentView.vue";
+import DocumentsView from "@/views/DocumentsView.vue";
 import Error404 from "@/views/Error404.vue";
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { auth, loggedUser } from "@/firebase";
-import DocumentsView from "@/views/DocumentsView.vue";
+
+const DOC_TYPES = [
+    "quotes",
+    "orders",
+    "work-orders",
+    "invoices",
+    "items",
+    "clients",
+];
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,36 +34,19 @@ const router = createRouter({
             name: "register",
             component: RegisterView,
         },
-        {
-            path: "/quotes",
-            name: "quotes",
+        ...DOC_TYPES.map((type) => ({
+            path: `/${type}`,
+            name: type,
             component: DocumentsView,
-        },
-        {
-            path: "/orders",
-            name: "orders",
-            component: DocumentsView,
-        },
-        {
-            path: "/work-orders",
-            name: "work-orders",
-            component: DocumentsView,
-        },
-        {
-            path: "/invoices",
-            name: "invoices",
-            component: DocumentsView,
-        },
-        {
-            path: "/items",
-            name: "items",
-            component: DocumentsView,
-        },
-        {
-            path: "/clients",
-            name: "clients",
-            component: DocumentsView,
-        },
+        })),
+        ...DOC_TYPES.slice(0, -2).map((type) => ({
+            path: `/${type}/:id`,
+            name: `${type}-document`,
+            component: DocumentView,
+            meta: {
+                parentName: type,
+            },
+        })),
         {
             path: "/:pathMatch(.*)*",
             name: "not-found",

@@ -1,4 +1,5 @@
 <script setup>
+    import CardBase from "@/components/CardBase.vue";
     import DashboardHeader from "@/components/DashboardHeader.vue";
     import MobileNavbar from "@/components/MobileNavbar.vue";
     import ModalBase from "@/components/ModalBase.vue";
@@ -10,6 +11,7 @@
         readCollection,
         updateDocument,
     } from "@/firebase";
+    import { formatPrice } from "@/utils/formatUtils";
     import { Info, LoaderCircle, Plus, SaveCheck } from "@lucide/vue";
     import { onMounted, ref } from "vue";
     import { useRoute } from "vue-router";
@@ -20,7 +22,7 @@
     const selected = ref(null);
     const activeModal = ref(null);
     const errMsg = ref(null);
-    const loading = ref(false);
+    const loading = ref(true);
 
     function openModal(name, item = null) {
         selected.value = item;
@@ -92,7 +94,6 @@
     }
 
     onMounted(async () => {
-        loading.value = true;
         await getData();
         loading.value = false;
     });
@@ -133,78 +134,73 @@
                 <span>za prikazivanje</span>
             </div>
 
-            <!-- Učitavanje kartica -->
-            <div
+            <!-- Učitavanje artikala i klijenata -->
+            <CardBase
+                v-if="['items', 'clients'].includes(route.name)"
                 v-for="(item, idx) in items"
                 class="bg-mm-lightnavy rounded-2xl p-4"
                 :key="idx"
             >
-                <!-- Učitavanje artikala i klijenata -->
-                <div
-                    v-if="['items', 'clients'].includes(route.name)"
-                    class="flex flex-col gap-2"
-                >
-                    <div class="separate-and-center">
-                        <span class="text-mm-white text-xl font-medium">{{
-                            item.name
-                        }}</span>
-                        <Info
-                            @click="openModal('info', item)"
-                            class="text-mm-neutral"
-                        />
-                    </div>
-                    <hr v-if="route.name === 'items'" class="text-mm-gray" />
-                    <div
-                        v-if="route.name === 'items'"
-                        class="separate-and-center text-mm-gray font-semibold"
-                    >
-                        <span>Jedinična cijena:</span>
-                        <span>{{ item.price + " €/" + item.unit }}</span>
-                    </div>
+                <div class="separate-and-center">
+                    <span class="text-mm-white text-xl font-medium">{{
+                        item.name
+                    }}</span>
+                    <Info
+                        @click="openModal('info', item)"
+                        class="text-mm-neutral"
+                    />
                 </div>
+                <hr v-if="route.name === 'items'" class="text-mm-gray" />
+                <div
+                    v-if="route.name === 'items'"
+                    class="separate-and-center text-mm-gray font-semibold"
+                >
+                    <span>Jedinična cijena:</span>
+                    <span>{{ item.price + " €/" + item.unit }}</span>
+                </div>
+            </CardBase>
 
-                <!-- Učitavanje dokumenata -->
-                <div
-                    v-if="
-                        [
-                            'quotes',
-                            'orders',
-                            'work-orders',
-                            'invoices',
-                        ].includes(route.name)
-                    "
-                    class="flex flex-col gap-2"
-                >
-                    <div class="separate-and-center">
-                        <span class="text-mm-white text-xl font-medium">{{
-                            item.name
-                        }}</span>
-                        <Info
-                            @click="openModal('info', item)"
-                            class="text-mm-neutral"
-                        />
-                    </div>
-                    <hr class="text-mm-gray" />
-                    <div class="separate-and-center text-mm-gray font-semibold">
-                        <span>Kreirano:</span>
-                        <span>{{
-                            item.createdAt.toDate().toLocaleDateString("hr-HR")
-                        }}</span>
-                    </div>
-                    <div class="separate-and-center">
-                        <span class="text-mm-gray font-semibold">Status:</span>
-                        <span
-                            class="border rounded-full px-2"
-                            :class="statusStyle(item.status)"
-                            >{{ item.status }}</span
-                        >
-                    </div>
-                    <div class="separate-and-center text-mm-gray font-semibold">
-                        <span>Vrijednost:</span>
-                        <span>{{ Number(item.total).toFixed(2) }} €</span>
-                    </div>
+            <!-- Učitavanje dokumenata -->
+            <CardBase
+                v-if="
+                    ['quotes', 'orders', 'work-orders', 'invoices'].includes(
+                        route.name,
+                    )
+                "
+                v-for="(item, idx) in items"
+                class="bg-mm-lightnavy rounded-2xl p-4"
+                :route-to="`/${route.name}/${item.id}`"
+                :key="idx"
+            >
+                <div class="separate-and-center">
+                    <span class="text-mm-white text-xl font-medium">{{
+                        item.name
+                    }}</span>
+                    <Info
+                        @click="openModal('info', item)"
+                        class="text-mm-neutral"
+                    />
                 </div>
-            </div>
+                <hr class="text-mm-gray" />
+                <div class="separate-and-center text-mm-gray font-semibold">
+                    <span>Kreirano:</span>
+                    <span>{{
+                        item.createdAt.toDate().toLocaleDateString("hr-HR")
+                    }}</span>
+                </div>
+                <div class="separate-and-center">
+                    <span class="text-mm-gray font-semibold">Status:</span>
+                    <span
+                        class="border rounded-full px-2"
+                        :class="statusStyle(item.status)"
+                        >{{ item.status }}</span
+                    >
+                </div>
+                <div class="separate-and-center text-mm-gray font-semibold">
+                    <span>Vrijednost:</span>
+                    <span>{{ formatPrice(item.total) }}</span>
+                </div>
+            </CardBase>
         </div>
 
         <!-- Modal za unos i izmjenu artikla, klijenta i dokumenta -->

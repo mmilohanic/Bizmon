@@ -57,9 +57,7 @@ async function readCollection(name, sortBy, dir) {
 async function readDocument(collName, docId) {
     const data = await getDoc(doc(db, collName, docId));
 
-    return data.exists()
-        ? data.docs.map((d) => Object.assign(d.data(), { id: d.id }))
-        : null;
+    return data.exists() ? Object.assign(data.data(), { id: data.id }) : null;
 }
 
 async function updateDocument(collName, data, docId) {
@@ -74,8 +72,9 @@ export {
     auth,
     db,
     loggedUser,
-    readCollection,
     createDocument,
+    readCollection,
+    readDocument,
     updateDocument,
     deleteDocument,
 };

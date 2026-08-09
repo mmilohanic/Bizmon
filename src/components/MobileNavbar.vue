@@ -7,11 +7,17 @@
         <router-link
             v-for="(item, idx) in doctypesData.filter((i) => !i.menuItem)"
             :to="item.path"
-            class="text-mm-gray size-16.5"
-            :class="{
-                'bg-mm-lightnavy text-mm-primary rounded-xl':
-                    item.path == $route.path,
-            }"
+            class="text-mm-gray size-16.5 rounded-xl"
+            :class="[
+                {
+                    'bg-mm-lightnavy text-mm-primary':
+                        item.path.slice(1) === $route.name,
+                },
+                {
+                    'text-mm-primary':
+                        item.path.slice(1) === $route.meta.parentName,
+                },
+            ]"
             :key="idx"
         >
             <div class="h-full flex flex-col items-center justify-center">

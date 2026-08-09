@@ -99,6 +99,7 @@
                               )[0],
                               createdAt: serverTimestamp(),
                               total: 0.0,
+                              docItems: [],
                           },
                       ),
                   )
