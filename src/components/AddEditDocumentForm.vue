@@ -3,7 +3,7 @@
     import { readCollection } from "@/firebase";
     import { ChevronDown } from "@lucide/vue";
     import { serverTimestamp } from "firebase/firestore";
-    import { computed, onMounted, reactive, ref } from "vue";
+    import { computed, onMounted, reactive, ref, watch } from "vue";
     import { useRoute } from "vue-router";
 
     const route = useRoute();
@@ -57,22 +57,26 @@
         Boolean(documentsForm.name && documentsForm.clientName),
     );
 
-    const clientValid = computed(() =>
-        Boolean(
-            allClients.value.find(
-                (c) =>
-                    c.id === documentsForm.clientId &&
-                    c.name === documentsForm.clientName,
-            ),
-        ),
-    );
-
     const formEdited = computed(
         () =>
             props.isEdit &&
             Object.keys(documentsForm).some(
                 (key) => documentsForm[key] !== props.selected[key],
             ),
+    );
+
+    watch(
+        () => documentsForm.clientName,
+        () => {
+            const client = allClients.value.find(
+                (c) => c.name === documentsForm.clientName,
+            );
+
+            if (!documentsForm.clientId && client)
+                documentsForm.clientId = client.id;
+            if (documentsForm.clientId && !client)
+                documentsForm.clientId = null;
+        },
     );
 
     onMounted(async () => {
@@ -164,6 +168,7 @@
                     placeholder="Pretraživanje klijenata..."
                     @focus="clientDropOpen = true"
                     @blur="clientDropOpen = false"
+                    required
                     v-model="documentsForm.clientName"
                 />
 
@@ -195,9 +200,7 @@
         <hr class="border-mm-gray border" />
         <div class="flex justify-center pt-3 relative">
             <button
-                :disabled="
-                    !formValid || !clientValid || (isEdit && !formEdited)
-                "
+                :disabled="!formValid || (isEdit && !formEdited)"
                 type="submit"
                 class="confirm-btn"
             >

@@ -4,7 +4,6 @@
     import MobileNavbar from "@/components/MobileNavbar.vue";
     import ModalBase from "@/components/ModalBase.vue";
     import firebaseError from "@/data/errorsData";
-    import routesData from "@/data/routesData";
     import { readCollection, readDocument, updateDocument } from "@/firebase";
     import { formatPrice } from "@/utils/formatUtils";
     import {
@@ -32,6 +31,8 @@
         clientName: "",
         id: "",
     });
+
+    const clientData = ref(null);
 
     const selected = ref(null);
     const activeModal = ref(null);
@@ -150,6 +151,14 @@
         updateDocItems([...fsDocument.docItems].toSpliced(idx, 1));
     }
 
+    async function getClient(id) {
+        try {
+            return await readDocument("clients", id);
+        } catch (error) {
+            alert(firebaseError(error.code));
+        }
+    }
+
     onMounted(async () => {
         try {
             const document = await readDocument(
@@ -159,6 +168,9 @@
 
             Object.assign(fsDocument, document);
             allItems.value = await readCollection("items", "name", "asc");
+            clientData.value = fsDocument.clientId
+                ? await getClient(fsDocument.clientId)
+                : { name: fsDocument.clientName };
         } catch (error) {
             fsDocument = null;
             alert(firebaseError(error));
@@ -173,6 +185,7 @@
     <div class="bg-mm-dark h-screen">
         <DashboardHeader
             :doc-title="fsDocument ? fsDocument.name : ''"
+            :download-data="[fsDocument, route.meta.parentName, clientData]"
             class="fixed top-0 w-full z-10"
         />
 
@@ -202,7 +215,7 @@
 
                 <!-- Učitavanje stavaka -->
                 <CardBase
-                    v-if="fsDocument"
+                    v-if="!loading && fsDocument"
                     v-for="(item, idx) in fsDocument.docItems"
                     :key="idx"
                 >

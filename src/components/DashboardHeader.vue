@@ -2,6 +2,7 @@
     import doctypesData from "@/data/doctypesData";
     import firebaseError from "@/data/errorsData";
     import { auth } from "@/firebase";
+    import { downloadPDF } from "@/utils/downloadPDF";
     import {
         ArrowLeft,
         Component,
@@ -19,6 +20,7 @@
     defineProps({
         infoActive: Boolean,
         docTitle: String,
+        downloadData: Array,
     });
 
     const openMenu = ref(false);
@@ -82,6 +84,7 @@
                 <Download
                     v-if="route.params.id"
                     class="header-icon text-mm-success!"
+                    @click="downloadPDF(...downloadData)"
                 />
                 <Menu
                     v-else

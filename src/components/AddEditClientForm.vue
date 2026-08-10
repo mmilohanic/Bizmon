@@ -22,18 +22,6 @@
         country: "Hrvatska",
     });
 
-    const formValid = computed(() =>
-        Boolean(
-            clientsForm.name &&
-            clientsForm.oib &&
-            clientsForm.street &&
-            clientsForm.street_num &&
-            clientsForm.zip &&
-            clientsForm.town &&
-            clientsForm.country,
-        ),
-    );
-
     const formEdited = computed(
         () =>
             props.isEdit &&
@@ -65,7 +53,7 @@
         @submit.prevent="
             isEdit
                 ? formEdited && emit('edit', { ...clientsForm })
-                : formValid && emit('add', { ...clientsForm })
+                : clientsForm.name && emit('add', { ...clientsForm })
         "
         class="main-container"
     >
@@ -93,7 +81,6 @@
                 title="OIB mora imati 11 znamenki"
                 maxlength="11"
                 autocomplete="off"
-                required
                 @focus="OIBerr = null"
                 @blur="if (!validOIB) OIBerr = 'Uneseni OIB nije ispravan';"
                 v-model="clientsForm.oib"
@@ -143,7 +130,6 @@
                 class="input-field"
                 placeholder="npr. 35A"
                 autocomplete="off"
-                required
                 v-model="clientsForm.street_num"
             />
         </div>
@@ -156,7 +142,6 @@
                 class="input-field"
                 placeholder="npr. 52000"
                 autocomplete="off"
-                required
                 v-model="clientsForm.zip"
             />
         </div>
@@ -168,7 +153,6 @@
                 class="input-field"
                 placeholder="npr. Zagreb"
                 autocomplete="off"
-                required
                 v-model="clientsForm.town"
             />
         </div>
@@ -180,7 +164,6 @@
                 class="input-field"
                 placeholder="npr. Hrvatska"
                 autocomplete="off"
-                required
                 v-model="clientsForm.country"
             />
         </div>
@@ -188,7 +171,7 @@
         <div class="flex justify-center pt-3 relative">
             <button
                 :disabled="
-                    !formValid ||
+                    !clientsForm.name ||
                     (!isEdit && !validOIB) ||
                     (isEdit && !formEdited)
                 "
