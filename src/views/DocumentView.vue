@@ -172,7 +172,6 @@
                 ? await getClient(fsDocument.clientId)
                 : { name: fsDocument.clientName };
         } catch (error) {
-            fsDocument = null;
             alert(firebaseError(error));
         }
         loading.value = false;
