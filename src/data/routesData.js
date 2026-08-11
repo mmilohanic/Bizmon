@@ -17,6 +17,7 @@ export default {
             none: "Nema artikala",
             succ: "Artikl je uspješno unesen.",
         },
+        isDocument: false,
     },
     clients: {
         addEditModal: AddEditClientForm,
@@ -29,6 +30,7 @@ export default {
             none: "Nema klijenata",
             succ: "Klijent je uspješno unesen.",
         },
+        isDocument: false,
     },
     quotes: {
         addEditModal: AddEditDocumentForm,
@@ -42,11 +44,12 @@ export default {
             succ: "Ponuda je uspješno unesena.",
         },
         status: {
-            Kreirana: "muted",
+            Kreirana: "white",
             Poslana: "warning",
             Prihvaćena: "success",
             Odbijena: "error",
         },
+        isDocument: true,
     },
     orders: {
         addEditModal: AddEditDocumentForm,
@@ -60,10 +63,11 @@ export default {
             succ: "Narudžba je uspješno unesena.",
         },
         status: {
-            Kreirana: "muted",
+            Kreirana: "white",
             Poslana: "warning",
             Plaćena: "success",
         },
+        isDocument: true,
     },
     "work-orders": {
         addEditModal: AddEditDocumentForm,
@@ -80,6 +84,7 @@ export default {
             Otvoren: "warning",
             Zatvoren: "success",
         },
+        isDocument: true,
     },
     invoices: {
         addEditModal: AddEditDocumentForm,
@@ -93,9 +98,10 @@ export default {
             succ: "Račun je uspješno unesen.",
         },
         status: {
-            Kreiran: "muted",
+            Kreiran: "white",
             Poslan: "warning",
             Plaćen: "success",
         },
+        isDocument: true,
     },
 };

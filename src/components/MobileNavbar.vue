@@ -11,7 +11,7 @@
             :class="[
                 {
                     'bg-mm-lightnavy text-mm-primary':
-                        item.path.slice(1) === $route.name,
+                        item.path === $route.path,
                 },
                 {
                     'text-mm-primary':

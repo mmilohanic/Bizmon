@@ -7,14 +7,14 @@ import RegisterView from "@/views/RegisterView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { auth, loggedUser } from "@/firebase";
 
-const DOC_TYPES = [
-    "quotes",
-    "orders",
-    "work-orders",
-    "invoices",
-    "items",
-    "clients",
-];
+const DOC_TYPES = {
+    quotes: "Ponude",
+    orders: "Narudžbe",
+    "work-orders": "Radni nalozi",
+    invoices: "Računi",
+    items: "Artikli",
+    clients: "Klijenti",
+};
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,39 +23,58 @@ const router = createRouter({
             path: "/",
             name: "dashboard",
             component: DashboardView,
+            meta: {
+                title: "Početna",
+            },
         },
         {
             path: "/login",
             name: "login",
             component: LoginView,
+            meta: {
+                title: "Prijava",
+            },
         },
         {
             path: "/register",
             name: "register",
             component: RegisterView,
+            meta: {
+                title: "Registracija",
+            },
         },
-        ...DOC_TYPES.map((type) => ({
+        ...Object.keys(DOC_TYPES).map((type) => ({
             path: `/${type}`,
             name: type,
             component: DocumentsView,
-        })),
-        ...DOC_TYPES.slice(0, -2).map((type) => ({
-            path: `/${type}/:id`,
-            name: `${type}-document`,
-            component: DocumentView,
             meta: {
-                parentName: type,
+                title: DOC_TYPES[type],
             },
         })),
+        ...Object.keys(DOC_TYPES)
+            .slice(0, -2)
+            .map((type) => ({
+                path: `/${type}/:id`,
+                name: `${type}-document`,
+                component: DocumentView,
+                meta: {
+                    parentName: type,
+                },
+            })),
         {
             path: "/:pathMatch(.*)*",
             name: "not-found",
             component: Error404,
+            meta: {
+                title: "Nepostojeća",
+            },
         },
     ],
 });
 
 router.beforeEach(async (to) => {
+    document.title = to.meta.title ? `${to.meta.title} · Bizmon` : "Bizmon";
+
     await auth.authStateReady();
     const publicRoute = ["login", "register"].includes(to.name);
 

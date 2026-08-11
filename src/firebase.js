@@ -39,7 +39,7 @@ onAuthStateChanged(auth, (user) => {
 
 async function createDocument(collName, data) {
     data["ownerId"] = loggedUser.value.uid;
-    await addDoc(collection(db, collName), data);
+    return await addDoc(collection(db, collName), data);
 }
 
 async function readCollection(name, sortBy, dir) {
@@ -61,11 +61,11 @@ async function readDocument(collName, docId) {
 }
 
 async function updateDocument(collName, data, docId) {
-    await updateDoc(doc(db, collName, docId), data);
+    return await updateDoc(doc(db, collName, docId), data);
 }
 
 async function deleteDocument(collName, docId) {
-    await deleteDoc(doc(db, collName, docId));
+    return await deleteDoc(doc(db, collName, docId));
 }
 
 export {

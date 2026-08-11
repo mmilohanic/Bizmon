@@ -73,8 +73,7 @@
                     v-if="route.name === 'dashboard'"
                     class="header-icon"
                     :class="{
-                        'text-mm-primary bg-mm-lightnavy rounded-lg':
-                            infoActive,
+                        'icon-active': infoActive,
                     }"
                     @click="
                         $emit('openInfo');
@@ -91,7 +90,7 @@
                     class="header-icon"
                     @click="openMenu = !openMenu"
                     :class="{
-                        'text-mm-primary bg-mm-lightnavy rounded-lg': openMenu,
+                        'icon-active': openMenu,
                     }"
                 />
             </div>
@@ -123,5 +122,9 @@
 
     .header-icon {
         @apply size-11 text-mm-gray p-1.5;
+    }
+
+    .icon-active {
+        @apply text-mm-primary bg-mm-lightnavy rounded-lg;
     }
 </style>

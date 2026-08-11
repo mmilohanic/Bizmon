@@ -14,9 +14,10 @@
     import { formatPrice } from "@/utils/formatUtils";
     import { Info, LoaderCircle, Plus, SaveCheck } from "@lucide/vue";
     import { onMounted, ref } from "vue";
-    import { useRoute } from "vue-router";
+    import { useRoute, useRouter } from "vue-router";
 
     const route = useRoute();
+    const router = useRouter();
 
     const items = ref([]);
     const selected = ref(null);
@@ -40,26 +41,24 @@
         errMsg.value = null;
         try {
             item = handleBlanks(item);
-            await createDocument(route.name, item);
+            const response = await createDocument(route.name, item);
 
-            openModal("succ");
-            await getData();
+            router.push(`/${route.name}/${response.id}`);
         } catch (error) {
             errMsg.value = firebaseError(error.code);
         }
     }
 
-    async function getData(name = route.name, sortBy = "name", dir = "asc") {
+    async function getData(name, sortBy, dir) {
         try {
             items.value = await readCollection(name, sortBy, dir);
         } catch (error) {
             alert(firebaseError(error));
-            console.log(error);
         }
     }
 
     async function editData(item) {
-        const changedItems = handleBlanks(
+        const changedValues = handleBlanks(
             Object.fromEntries(
                 Object.entries(item).filter(
                     ([k, v]) => v !== selected.value[k],
@@ -68,9 +67,14 @@
         );
 
         try {
-            await updateDocument(route.name, changedItems, selected.value.id);
+            await updateDocument(route.name, changedValues, selected.value.id);
+
+            Object.assign(
+                items.value.find((i) => i.id === item.id),
+                changedValues,
+            );
+
             openModal(null);
-            await getData();
         } catch (error) {
             errMsg.value = firebaseError(error.code);
         }
@@ -81,8 +85,13 @@
 
         try {
             await deleteDocument(route.name, selected.value.id);
+
+            items.value.splice(
+                items.value.findIndex((i) => i.id === selected.value.id),
+                1,
+            );
+
             openModal(null);
-            await getData();
         } catch (error) {
             errMsg.value = firebaseError(error.code);
         }
@@ -94,7 +103,10 @@
     }
 
     onMounted(async () => {
-        await getData();
+        routesData[route.name].isDocument
+            ? await getData(route.name, "createdAt", "desc")
+            : await getData(route.name, "name", "asc");
+
         loading.value = false;
     });
 </script>
@@ -136,7 +148,7 @@
 
             <!-- Učitavanje artikala i klijenata -->
             <CardBase
-                v-if="['items', 'clients'].includes(route.name)"
+                v-if="!routesData[route.name].isDocument"
                 v-for="(item, idx) in items"
                 class="bg-mm-lightnavy rounded-2xl p-4"
                 :key="idx"
@@ -162,11 +174,7 @@
 
             <!-- Učitavanje dokumenata -->
             <CardBase
-                v-if="
-                    ['quotes', 'orders', 'work-orders', 'invoices'].includes(
-                        route.name,
-                    )
-                "
+                v-if="routesData[route.name].isDocument"
                 v-for="(item, idx) in items"
                 class="bg-mm-lightnavy rounded-2xl p-4"
                 :route-to="`/${route.name}/${item.id}`"
@@ -177,26 +185,26 @@
                         item.name
                     }}</span>
                     <Info
-                        @click="openModal('info', item)"
+                        @click.stop.prevent="openModal('info', item)"
                         class="text-mm-neutral"
                     />
                 </div>
                 <hr class="text-mm-gray" />
-                <div class="separate-and-center text-mm-gray font-semibold">
+                <div class="separate-and-center text-mm-muted font-semibold">
                     <span>Kreirano:</span>
                     <span>{{
                         item.createdAt.toDate().toLocaleDateString("hr-HR")
                     }}</span>
                 </div>
                 <div class="separate-and-center">
-                    <span class="text-mm-gray font-semibold">Status:</span>
+                    <span class="text-mm-muted font-semibold">Status:</span>
                     <span
                         class="border rounded-full px-2"
                         :class="statusStyle(item.status)"
                         >{{ item.status }}</span
                     >
                 </div>
-                <div class="separate-and-center text-mm-gray font-semibold">
+                <div class="separate-and-center text-mm-muted font-semibold">
                     <span>Vrijednost:</span>
                     <span>{{ formatPrice(item.total) }}</span>
                 </div>

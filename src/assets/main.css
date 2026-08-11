@@ -16,9 +16,6 @@
     --font-sans: "Inter Variable", sans-serif;
 }
 
-/* Ručno uključivanje boja koje se dinamički generiraju */
-@source inline("{text,border}-mm-{muted,success,error,warning}");
-
 .main-container {
     @apply flex flex-col gap-4;
 }

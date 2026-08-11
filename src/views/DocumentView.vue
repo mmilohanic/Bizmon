@@ -13,7 +13,7 @@
         Plus,
         Trash,
     } from "@lucide/vue";
-    import { computed, onMounted, reactive, ref } from "vue";
+    import { computed, onMounted, reactive, ref, watch } from "vue";
     import { useRoute, useRouter } from "vue-router";
 
     const route = useRoute();
@@ -159,6 +159,10 @@
         }
     }
 
+    watch(fsDocument, (doc) => {
+        document.title = doc ? `${doc.name} · Bizmon` : "Bizmon";
+    });
+
     onMounted(async () => {
         try {
             const document = await readDocument(
@@ -234,7 +238,7 @@
                         </div>
                     </div>
                     <div class="separate-and-center font-semibold">
-                        <span class="text-mm-gray">{{
+                        <span class="text-mm-muted">{{
                             `${item.amount} ${item.unit} × ${formatPrice(item.price)}`
                         }}</span>
                         <span class="text-mm-white text-lg">{{
