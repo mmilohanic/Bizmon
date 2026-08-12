@@ -4,7 +4,13 @@
     import MobileNavbar from "@/components/MobileNavbar.vue";
     import ModalBase from "@/components/ModalBase.vue";
     import firebaseError from "@/data/errorsData";
-    import { readCollection, readDocument, updateDocument } from "@/firebase";
+    import {
+        loggedUser,
+        readCollection,
+        readDocument,
+        updateDocument,
+        userData,
+    } from "@/firebase";
     import { formatPrice } from "@/utils/formatUtils";
     import {
         ChevronDown,
@@ -171,12 +177,50 @@
             );
 
             Object.assign(fsDocument, document);
+
+            const docIdx = userData.value
+                ? userData.value.recentDocuments.findIndex(
+                      (doc) => doc.docId === fsDocument.id,
+                  )
+                : 0;
+
+            if (docIdx !== 0) {
+                let newRecents = [
+                    {
+                        docId: fsDocument.id,
+                        docName: fsDocument.name,
+                        docType: route.meta.parentName,
+                    },
+                ];
+
+                if (docIdx === -1) {
+                    newRecents.push(
+                        ...userData.value.recentDocuments.slice(0, 2),
+                    );
+                } else if (docIdx > 0) {
+                    newRecents.push(
+                        ...userData.value.recentDocuments.toSpliced(docIdx, 1),
+                    );
+                }
+
+                updateDocument(
+                    "users",
+                    {
+                        recentDocuments: newRecents,
+                    },
+                    loggedUser.value.uid,
+                );
+
+                userData.value.recentDocuments = newRecents;
+            }
+
             allItems.value = await readCollection("items", "name", "asc");
+
             clientData.value = fsDocument.clientId
                 ? await getClient(fsDocument.clientId)
                 : { name: fsDocument.clientName };
         } catch (error) {
-            alert(firebaseError(error));
+            alert(firebaseError(error.code));
         }
         loading.value = false;
 

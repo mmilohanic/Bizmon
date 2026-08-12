@@ -8,7 +8,7 @@
         KeyRound,
         Repeat2,
     } from "@lucide/vue";
-    import { ref, computed } from "vue";
+    import { ref, computed, onMounted } from "vue";
     import { useRouter } from "vue-router";
     import {
         createUserWithEmailAndPassword,
@@ -135,6 +135,7 @@
                     registered_on: serverTimestamp(),
                     collabs_count: 0,
                     active: true,
+                    recentDocuments: [],
                 });
 
                 succReg.value = true;

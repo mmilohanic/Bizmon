@@ -1,5 +1,4 @@
 <script setup>
-    import router from "@/router";
     import { ArrowLeft, SearchAlert } from "@lucide/vue";
 </script>
 
@@ -23,7 +22,7 @@
                 <span>nije dostupna</span>
                 <span>ili ne postoji.</span>
             </div>
-            <router-link
+            <RouterLink
                 to="/"
                 replace
                 class="bg-mm-primary text-mm-dark text-lg font-extrabold flex items-center w-fit mx-auto py-2 px-7 rounded-full"
@@ -32,7 +31,7 @@
                     <ArrowLeft />
                     <span>NATRAG</span>
                 </div>
-            </router-link>
+            </RouterLink>
         </div>
     </div>
 </template>

@@ -4,7 +4,8 @@
     import ModalBase from "@/components/ModalBase.vue";
     import doctypesData from "@/data/doctypesData";
     import firebaseError from "@/data/errorsData";
-    import { auth, db, loggedUser } from "@/firebase";
+    import { auth, db, loggedUser, readCollection, userData } from "@/firebase";
+    import { formatPrice } from "@/utils/formatUtils";
     import {
         ChartNoAxesCombined,
         ChevronDown,
@@ -12,7 +13,6 @@
         Eye,
         EyeOff,
         SaveCheck,
-        X,
     } from "@lucide/vue";
     import {
         deleteUser,
@@ -23,7 +23,7 @@
         updatePassword,
     } from "firebase/auth";
     import { doc, updateDoc } from "firebase/firestore";
-    import { computed, ref } from "vue";
+    import { computed, onMounted, reactive, ref, watch } from "vue";
     import { useRouter } from "vue-router";
 
     const router = useRouter();
@@ -37,54 +37,72 @@
     const normalLogin =
         loggedUser.value.providerData[0].providerId === "password";
 
+    const documents = reactive({
+        quotes: [],
+        orders: [],
+        "work-orders": [],
+        invoices: [],
+    });
+
+    const invoicesInfo = reactive([
+        {
+            label: "Naplaćeno",
+            count: 0,
+            sum: 0,
+        },
+        {
+            label: "Otvoreno",
+            count: 0,
+            sum: 0,
+        },
+    ]);
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const day = now.getDate();
     const options = [
-        "ovaj mjesec",
-        "zadnji mjesec",
-        "3 mjeseca",
-        "6 mjeseci",
-        "jedna godina",
-        "od početka",
-    ];
-
-    const billsTest = [
+        { label: "ovaj mjesec", start: new Date(year, month, 1) },
         {
-            type: "Naplaćeno",
-            amount: 7,
-            total: 2568.34,
+            label: "prošli mjesec",
+            start: new Date(year, month - 1, 1),
+            end: new Date(year, month, 0),
         },
-        {
-            type: "Otvoreno",
-            amount: 5,
-            total: 768.46,
-        },
-    ];
-
-    const recentActivity = ref(false);
-    const recentTest = [
-        {
-            name: "Klime zgrada Žminj",
-            type: "Računi",
-        },
-        {
-            name: "Sv. Lovreč - iskop Perić",
-            type: "Ponude",
-        },
-        {
-            name: "Elektroinstalacija Marić",
-            type: "Narudžbe",
-        },
+        { label: "3 mjeseca", start: new Date(year, month - 3, day) },
+        { label: "6 mjeseci", start: new Date(year, month - 6, day) },
+        { label: "jedna godina", start: new Date(year - 1, month, day) },
+        { label: "od početka", start: null },
     ];
 
     const selected = ref(options[0]);
     const open = ref(false);
+
+    const documentCounts = computed(() =>
+        selected.value.start
+            ? Object.fromEntries(
+                  Object.keys(documents).map((key) => [
+                      key,
+                      documents[key].filter(
+                          (document) =>
+                              document.createdAt.toDate() >=
+                                  selected.value.start &&
+                              document.createdAt.toDate() <=
+                                  (selected.value.end ?? new Date()),
+                      ).length,
+                  ]),
+              )
+            : Object.fromEntries(
+                  Object.entries(documents).map(([k, v]) => [k, v.length]),
+              ),
+    );
 
     function select(option) {
         selected.value = option;
         open.value = false;
     }
 
-    function chooseIcon(document) {
-        return doctypesData.find((dtype) => dtype.label === document).icon;
+    function chooseIcon(docType) {
+        return doctypesData.find((el) => el.path.includes(docType)).icon;
     }
 
     function openModal(name) {
@@ -202,6 +220,31 @@
             }
         }
     }
+
+    watch(
+        () => documents.invoices,
+        () =>
+            documents.invoices.forEach((inv) => {
+                const idx = Number(inv.status !== "Plaćen");
+                invoicesInfo[idx].count += 1;
+                invoicesInfo[idx].sum += inv.total;
+            }),
+    );
+
+    onMounted(async () => {
+        try {
+            Object.keys(documents).map(
+                async (key) =>
+                    (documents[key] = await readCollection(
+                        key,
+                        "createdAt",
+                        "desc",
+                    )),
+            );
+        } catch (error) {
+            alert(firebaseError(error.code));
+        }
+    });
 </script>
 
 <template>
@@ -228,7 +271,7 @@
                             :class="{ 'rounded-b-none': open }"
                             @click="open = !open"
                         >
-                            <span>{{ selected }}</span>
+                            <span>{{ selected.label }}</span>
                             <ChevronDown />
                         </div>
 
@@ -244,7 +287,7 @@
                                 @click="select(option)"
                                 :key="idx"
                             >
-                                {{ option }}
+                                {{ option.label }}
                             </li>
                         </ul>
                     </div>
@@ -264,7 +307,9 @@
                             <component :is="item.icon" />
                             <span class="text-xl">{{ item.label }}</span>
                         </div>
-                        <span class="text-xl">{{ idx }}</span>
+                        <span class="text-xl">{{
+                            documentCounts[item.path.slice(1)]
+                        }}</span>
                     </div>
                 </div>
             </div>
@@ -273,21 +318,25 @@
             <div class="dashboard-section">
                 <div class="flex gap-2 items-center">
                     <CreditCard class="size-8" />
-                    <span class="text-[28px]">Računi</span>
+                    <span class="text-[28px]" @click="console.log(invoicesInfo)"
+                        >Računi</span
+                    >
                 </div>
                 <hr class="border-mm-gray border mt-2 mb-4" />
                 <div class="flex flex-col gap-3 px-1">
                     <div
-                        v-for="ent in billsTest"
+                        v-for="item in invoicesInfo"
                         class="flex items-center justify-between px-0.5"
                     >
                         <div class="flex flex-col tracking-wide">
-                            <span class="text-xl">{{ ent.type }}</span>
+                            <span class="text-xl">{{ item.label }}</span>
                             <span class="text-md text-mm-gray"
-                                >{{ ent.amount }} računa</span
+                                >{{ item.count }} računa</span
                             >
                         </div>
-                        <span class="text-2xl">{{ ent.total }} €</span>
+                        <span class="text-2xl">{{
+                            formatPrice(item.sum)
+                        }}</span>
                     </div>
                 </div>
             </div>
@@ -297,22 +346,23 @@
                 <span class="text-[28px] px-1">Nedavna aktivnost</span>
                 <hr class="border-mm-gray border mt-2 mb-4" />
                 <div class="flex flex-col gap-3 px-1">
+                    <RouterLink
+                        v-if="userData && userData.recentDocuments.length"
+                        v-for="doc in userData.recentDocuments"
+                        :to="`/${doc.docType}/${doc.docId}`"
+                        class="flex items-center gap-2"
+                    >
+                        <component :is="chooseIcon(doc.docType)" />
+                        <span class="text-xl font-semibold">{{
+                            doc.docName
+                        }}</span>
+                    </RouterLink>
                     <div
-                        v-if="!recentActivity"
+                        v-else
                         class="text-lg font-semibold flex flex-col items-center"
                     >
                         <span>Nije još zabilježena</span>
                         <span>nikakva aktivnost.</span>
-                    </div>
-                    <div
-                        v-else
-                        v-for="doc in recentTest"
-                        class="flex items-center gap-2"
-                    >
-                        <component :is="chooseIcon(doc.type)" />
-                        <span class="text-xl font-semibold">{{
-                            doc.name
-                        }}</span>
                     </div>
                 </div>
             </div>

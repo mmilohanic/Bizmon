@@ -14,6 +14,7 @@ import {
     where,
 } from "firebase/firestore";
 import { ref } from "vue";
+import firebaseError from "./data/errorsData";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDY5lbNITSD3VjyE23CBrOhBjLmY-vgF5o",
@@ -28,12 +29,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const loggedUser = ref(null);
+const userData = ref(null);
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        loggedUser.value = user;
-    } else {
-        loggedUser.value = null;
+onAuthStateChanged(auth, async (user) => {
+    loggedUser.value = user;
+
+    try {
+        userData.value = user ? await readDocument("users", user.uid) : null;
+    } catch (error) {
+        alert(firebaseError(error.code));
     }
 });
 
@@ -72,6 +76,7 @@ export {
     auth,
     db,
     loggedUser,
+    userData,
     createDocument,
     readCollection,
     readDocument,
