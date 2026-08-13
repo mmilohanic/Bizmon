@@ -1,6 +1,5 @@
 <script setup>
-    import DashboardHeader from "@/components/DashboardHeader.vue";
-    import MobileNavbar from "@/components/MobileNavbar.vue";
+    import AppLayout from "@/components/AppLayout.vue";
     import ModalBase from "@/components/ModalBase.vue";
     import doctypesData from "@/data/doctypesData";
     import firebaseError from "@/data/errorsData";
@@ -44,19 +43,6 @@
         invoices: [],
     });
 
-    const invoicesInfo = reactive([
-        {
-            label: "Naplaćeno",
-            count: 0,
-            sum: 0,
-        },
-        {
-            label: "Otvoreno",
-            count: 0,
-            sum: 0,
-        },
-    ]);
-
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();
@@ -74,6 +60,14 @@
         { label: "od početka", start: null },
     ];
 
+    function filterByRange(arr = [], range = selected.value) {
+        return arr.filter(
+            (document) =>
+                document.createdAt.toDate() >= range.start &&
+                document.createdAt.toDate() <= (range.end ?? new Date()),
+        );
+    }
+
     const selected = ref(options[0]);
     const open = ref(false);
 
@@ -82,19 +76,38 @@
             ? Object.fromEntries(
                   Object.keys(documents).map((key) => [
                       key,
-                      documents[key].filter(
-                          (document) =>
-                              document.createdAt.toDate() >=
-                                  selected.value.start &&
-                              document.createdAt.toDate() <=
-                                  (selected.value.end ?? new Date()),
-                      ).length,
+                      filterByRange(documents[key]).length,
                   ]),
               )
             : Object.fromEntries(
                   Object.entries(documents).map(([k, v]) => [k, v.length]),
               ),
     );
+
+    const invoicesInfo = computed(() => {
+        const result = [
+            {
+                label: "Naplaćeno",
+                count: 0,
+                sum: 0,
+            },
+            {
+                label: "Otvoreno",
+                count: 0,
+                sum: 0,
+            },
+        ];
+
+        const filteredInvoices = filterByRange(documents.invoices);
+
+        filteredInvoices.forEach((inv) => {
+            const idx = Number(inv.status !== "Plaćen");
+            result[idx].count += 1;
+            result[idx].sum += inv.total;
+        });
+
+        return result;
+    });
 
     function select(option) {
         selected.value = option;
@@ -221,16 +234,6 @@
         }
     }
 
-    watch(
-        () => documents.invoices,
-        () =>
-            documents.invoices.forEach((inv) => {
-                const idx = Number(inv.status !== "Plaćen");
-                invoicesInfo[idx].count += 1;
-                invoicesInfo[idx].sum += inv.total;
-            }),
-    );
-
     onMounted(async () => {
         try {
             Object.keys(documents).map(
@@ -248,14 +251,11 @@
 </script>
 
 <template>
-    <div class="bg-mm-dark h-screen">
-        <DashboardHeader
-            :info-active="activeModal === 'info'"
-            @open-info="openModal('info')"
-            class="fixed top-0 w-full z-10"
-        />
-
-        <div class="py-26 px-8 flex flex-col gap-4">
+    <AppLayout
+        :info-active="activeModal === 'info'"
+        @open-info="openModal('info')"
+    >
+        <div class="py-6 px-8 flex flex-col gap-4">
             <!-- Statistika -->
             <div class="dashboard-section">
                 <div class="flex justify-between items-center">
@@ -331,7 +331,7 @@
                         <div class="flex flex-col tracking-wide">
                             <span class="text-xl">{{ item.label }}</span>
                             <span class="text-md text-mm-gray"
-                                >{{ item.count }} računa</span
+                                >Ukupno: {{ item.count }}</span
                             >
                         </div>
                         <span class="text-2xl">{{
@@ -516,9 +516,7 @@
                 </div>
             </div>
         </ModalBase>
-
-        <MobileNavbar class="fixed bottom-0 w-full z-10" />
-    </div>
+    </AppLayout>
 </template>
 
 <style scoped>

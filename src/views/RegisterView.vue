@@ -153,86 +153,90 @@
 </script>
 
 <template>
-    <div class="bg-mm-dark h-screen flex flex-col items-center px-8">
-        <div class="py-10 text-[72px] font-extrabold">
-            <span class="text-mm-white">BIZ</span>
-            <span class="text-mm-primary">MON</span>
-        </div>
+    <div class="h-full flex flex-col justify-between bg-mm-dark">
+        <div class="flex flex-col items-center px-8 pb-8 overflow-y-auto">
+            <div class="py-10 text-7xl font-extrabold">
+                <span class="text-mm-white">BIZ</span>
+                <span class="text-mm-primary">MON</span>
+            </div>
 
-        <!-- Forma za registraciju -->
-        <form
-            v-if="!succReg"
-            @submit.prevent="registerUser()"
-            class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
-        >
-            <div v-for="item in loginData" class="main-container">
-                <div
-                    v-if="item.label.includes('LOZINKA')"
-                    class="flex justify-between items-center"
-                >
-                    <span class="log-reg-label">{{ item.label }}</span>
-                    <span class="text-mm-gray text-sm">min. 8 znakova</span>
+            <!-- Forma za registraciju -->
+            <form
+                v-if="!succReg"
+                @submit.prevent="registerUser()"
+                class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
+            >
+                <div v-for="item in loginData" class="main-container">
+                    <div
+                        v-if="item.label.includes('LOZINKA')"
+                        class="flex justify-between items-center"
+                    >
+                        <span class="log-reg-label">{{ item.label }}</span>
+                        <span class="text-mm-gray text-sm">min. 8 znakova</span>
+                    </div>
+                    <span v-else class="log-reg-label">{{ item.label }}</span>
+                    <div class="log-reg-field relative">
+                        <component :is="item.icon" size="30" />
+                        <input
+                            :class="{ 'text-mm-white': item.data.value }"
+                            :type="item.type"
+                            :inputmode="item.inputmode"
+                            :placeholder="item.placeholder"
+                            class="w-full px-1"
+                            v-model="item.data.value"
+                            @blur="
+                                if (!item.label.includes('PONOVI'))
+                                    item.visited.value = Boolean(
+                                        item.data.value,
+                                    );
+                            "
+                        />
+                        <span
+                            v-if="item.data.value && item.visited.value"
+                            class="absolute top-12 text-mm-error text-sm"
+                            >{{ item.rules }}</span
+                        >
+                    </div>
                 </div>
-                <span v-else class="log-reg-label">{{ item.label }}</span>
-                <div class="log-reg-field relative">
-                    <component :is="item.icon" size="30" />
-                    <input
-                        :class="{ 'text-mm-white': item.data.value }"
-                        :type="item.type"
-                        :inputmode="item.inputmode"
-                        :placeholder="item.placeholder"
-                        class="w-full px-1"
-                        v-model="item.data.value"
-                        @blur="
-                            if (!item.label.includes('PONOVI'))
-                                item.visited.value = Boolean(item.data.value);
-                        "
-                    />
+                <div class="relative flex flex-col items-center">
+                    <button
+                        :disabled="!allValid"
+                        type="submit"
+                        class="confirm-btn text-lg flex items-center py-2!"
+                    >
+                        REGISTRIRAJ SE
+                    </button>
                     <span
-                        v-if="item.data.value && item.visited.value"
-                        class="absolute top-12 text-mm-error text-sm"
-                        >{{ item.rules }}</span
+                        v-if="regErr.length"
+                        class="absolute text-mm-error text-sm -bottom-6"
+                        >{{ regErr }}</span
                     >
                 </div>
-            </div>
-            <div class="relative flex flex-col items-center">
-                <button
-                    :disabled="!allValid"
-                    type="submit"
-                    class="confirm-btn text-lg flex items-center py-2!"
-                >
-                    REGISTRIRAJ SE
-                </button>
-                <span
-                    v-if="regErr.length"
-                    class="absolute text-mm-error text-sm -bottom-6"
-                    >{{ regErr }}</span
-                >
-            </div>
-        </form>
+            </form>
 
-        <!-- Uspješna registracija -->
-        <div
-            v-else
-            class="bg-mm-lightnavy px-6 pt-15 pb-18 rounded-3xl w-full flex flex-col gap-15 items-center"
-        >
-            <CircleCheckBig class="size-35 stroke-[0.75] text-mm-success" />
-            <hr class="border-mm-gray w-full" />
+            <!-- Uspješna registracija -->
             <div
-                class="text-3xl text-mm-white flex flex-col items-center font-extralight"
+                v-else
+                class="bg-mm-lightnavy px-6 pt-15 pb-18 rounded-3xl w-full flex flex-col gap-15 items-center"
             >
-                <span>Registracija je</span>
-                <span>uspješno dovršena.</span>
-                <span>Nastavite s prijavom.</span>
+                <CircleCheckBig class="size-35 stroke-[0.75] text-mm-success" />
+                <hr class="border-mm-gray w-full" />
+                <div
+                    class="text-3xl text-mm-white flex flex-col items-center font-extralight"
+                >
+                    <span>Registracija je</span>
+                    <span>uspješno dovršena.</span>
+                    <span>Nastavite s prijavom.</span>
+                </div>
+                <button
+                    @click="logIn()"
+                    class="confirm-btn text-lg flex items-center"
+                >
+                    NASTAVI
+                </button>
             </div>
-            <button
-                @click="logIn()"
-                class="confirm-btn text-lg flex items-center"
-            >
-                NASTAVI
-            </button>
         </div>
 
-        <LoginRegisterBar v-if="!succReg" class="fixed bottom-0 w-full" />
+        <LoginRegisterBar v-if="!succReg" />
     </div>
 </template>

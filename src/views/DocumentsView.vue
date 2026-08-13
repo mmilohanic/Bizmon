@@ -1,15 +1,16 @@
 <script setup>
+    import AppLayout from "@/components/AppLayout.vue";
     import CardBase from "@/components/CardBase.vue";
-    import DashboardHeader from "@/components/DashboardHeader.vue";
-    import MobileNavbar from "@/components/MobileNavbar.vue";
     import ModalBase from "@/components/ModalBase.vue";
     import firebaseError from "@/data/errorsData";
     import routesData from "@/data/routesData";
     import {
         createDocument,
         deleteDocument,
+        loggedUser,
         readCollection,
         updateDocument,
+        userData,
     } from "@/firebase";
     import { formatPrice } from "@/utils/formatUtils";
     import { Info, LoaderCircle, Plus, SaveCheck } from "@lucide/vue";
@@ -91,6 +92,26 @@
                 1,
             );
 
+            const recentsIdx = userData.value.recentDocuments.find(
+                (item) => item.docId === selected.value.id,
+            );
+            if (recentsIdx !== -1) {
+                const newRecents = userData.value.recentDocuments.toSpliced(
+                    recentsIdx,
+                    1,
+                );
+
+                updateDocument(
+                    "users",
+                    {
+                        recentDocuments: newRecents,
+                    },
+                    loggedUser.value.uid,
+                );
+
+                userData.value.recentDocuments = newRecents;
+            }
+
             openModal(null);
         } catch (error) {
             errMsg.value = firebaseError(error.code);
@@ -112,19 +133,17 @@
 </script>
 
 <template>
-    <div class="bg-mm-dark h-screen">
-        <DashboardHeader class="fixed top-0 w-full z-10" />
-
+    <AppLayout>
         <!-- Gumb za dodavanje -->
         <div
             @click="openModal('add')"
-            class="fixed bottom-26 right-6 z-10 bg-mm-primary p-1.5 rounded-full"
+            class="fixed bottom-26 right-6 z-10 bg-mm-primary p-1.5 rounded-full border-2 border-mm-dark"
         >
-            <Plus class="size-11" />
+            <Plus class="size-11 text-mm-navy" />
         </div>
 
         <!-- Prikaz artikala, klijenata i dokumenata -->
-        <div class="py-26 px-8 flex flex-col gap-4 h-full">
+        <div class="py-6 px-8 flex flex-col gap-4">
             <!-- Obavijest o učitavanju elemenata -->
             <div
                 v-if="loading"
@@ -269,7 +288,5 @@
                 </div>
             </div>
         </ModalBase>
-
-        <MobileNavbar class="fixed bottom-0 w-full z-10" />
-    </div>
+    </AppLayout>
 </template>

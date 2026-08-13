@@ -17,7 +17,7 @@
 </script>
 
 <template>
-    <div class="h-25 px-8 py-6 bg-mm-navy flex">
+    <div class="h-25 min-h-25 max-h-25 px-8 py-6 bg-mm-navy flex">
         <router-link
             v-for="item in logRegData"
             :to="item.route"

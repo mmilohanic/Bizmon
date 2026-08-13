@@ -1,7 +1,6 @@
 <script setup>
+    import AppLayout from "@/components/AppLayout.vue";
     import CardBase from "@/components/CardBase.vue";
-    import DashboardHeader from "@/components/DashboardHeader.vue";
-    import MobileNavbar from "@/components/MobileNavbar.vue";
     import ModalBase from "@/components/ModalBase.vue";
     import firebaseError from "@/data/errorsData";
     import {
@@ -229,15 +228,12 @@
 </script>
 
 <template>
-    <div class="bg-mm-dark h-screen">
-        <DashboardHeader
-            :doc-title="fsDocument ? fsDocument.name : ''"
-            :download-data="[fsDocument, route.meta.parentName, clientData]"
-            class="fixed top-0 w-full z-10"
-        />
-
+    <AppLayout
+        :doc-title="fsDocument ? fsDocument.name : ''"
+        :download-data="[fsDocument, route.meta.parentName, clientData]"
+    >
         <!-- Prikaz stavaka -->
-        <div class="py-26 px-8 flex flex-col gap-6 justify-between h-full">
+        <div class="py-6 px-8 flex flex-col gap-4 justify-between h-full">
             <div class="flex flex-col gap-4 overflow-y-scroll">
                 <!-- Obavijest o učitavanju elemenata -->
                 <div
@@ -317,7 +313,7 @@
                     @click="openModal('add')"
                     class="bg-mm-primary p-1.5 rounded-full size-fit"
                 >
-                    <Plus class="size-11" />
+                    <Plus class="size-11 text-mm-dark" />
                 </div>
             </div>
         </div>
@@ -473,7 +469,5 @@
                 </div>
             </form>
         </ModalBase>
-
-        <MobileNavbar class="fixed bottom-0 w-full z-10" />
-    </div>
+    </AppLayout>
 </template>

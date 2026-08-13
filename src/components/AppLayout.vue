@@ -41,8 +41,11 @@
 </script>
 
 <template>
-    <div class="bg-mm-navy">
-        <div class="h-20 flex items-center justify-between gap-3 px-6">
+    <div class="h-dvh flex flex-col bg-mm-dark">
+        <!-- Header za smartphone -->
+        <div
+            class="relative bg-mm-navy h-20 flex items-center justify-between gap-3 px-6"
+        >
             <RouterLink
                 v-if="route.params.id"
                 :to="{ name: route.meta.parentName }"
@@ -95,9 +98,11 @@
                 />
             </div>
         </div>
+
+        <!-- Menu headera -->
         <div v-if="openMenu">
             <div
-                class="flex border-t border-b shadow-xl shadow-mm-dark border-mm-gray text-mm-white text-xl py-2"
+                class="absolute z-10 w-full bg-mm-navy flex border-t border-b shadow-xl shadow-mm-dark border-mm-gray text-mm-white text-xl py-2"
             >
                 <component
                     v-for="(item, idx) in doctypesData
@@ -114,6 +119,36 @@
                 </component>
             </div>
         </div>
+
+        <!-- Slot za sadržaj -->
+        <main class="flex-1 overflow-y-auto">
+            <slot />
+        </main>
+
+        <!-- Navbar za smartphone -->
+        <nav class="h-20 bg-mm-navy flex justify-around items-center">
+            <router-link
+                v-for="(item, idx) in doctypesData.filter((i) => !i.menuItem)"
+                :to="item.path"
+                class="text-mm-gray size-16.5 rounded-xl"
+                :class="[
+                    {
+                        'bg-mm-lightnavy text-mm-primary':
+                            item.path === $route.path,
+                    },
+                    {
+                        'text-mm-primary':
+                            item.path.slice(1) === $route.meta.parentName,
+                    },
+                ]"
+                :key="idx"
+            >
+                <div class="h-full flex flex-col items-center justify-center">
+                    <component :is="item.icon" class="size-10 stroke-[1.5]" />
+                    <span class="text-xs">{{ item.label }}</span>
+                </div>
+            </router-link>
+        </nav>
     </div>
 </template>
 

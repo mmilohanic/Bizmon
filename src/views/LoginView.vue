@@ -96,50 +96,53 @@
 </script>
 
 <template>
-    <div class="bg-mm-dark h-screen flex flex-col items-center px-8">
-        <div class="pt-10 pb-20 text-[72px] font-extrabold">
-            <span class="text-mm-white">BIZ</span>
-            <span class="text-mm-primary">MON</span>
+    <div class="h-full flex flex-col justify-between bg-mm-dark">
+        <div class="flex flex-col items-center px-8 pb-8 overflow-y-auto">
+            <div class="pt-10 pb-22 text-7xl font-extrabold">
+                <span class="text-mm-white">BIZ</span>
+                <span class="text-mm-primary">MON</span>
+            </div>
+
+            <form
+                @submit.prevent="logIn()"
+                class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
+            >
+                <div v-for="item in loginData" class="main-container">
+                    <span class="log-reg-label">{{ item.label }}</span>
+                    <div class="log-reg-field">
+                        <component :is="item.icon" size="30" />
+                        <input
+                            :class="{ 'text-mm-white': item.data.value }"
+                            :type="item.type"
+                            :inputmode="item.inputmode"
+                            :placeholder="item.placeholder"
+                            class="w-full px-1"
+                            v-model="item.data.value"
+                        />
+                    </div>
+                </div>
+                <div class="relative flex flex-col items-center">
+                    <span
+                        v-if="loginErr"
+                        class="absolute top-1 text-mm-error"
+                        >{{ loginErr }}</span
+                    >
+                    <hr class="border-mm-gray w-full" />
+                </div>
+                <div class="flex flex-col gap-6 max-w-50 mx-auto">
+                    <button
+                        class="confirm-btn flex gap-3 place-items-center text-lg"
+                        :disabled="!(email && password)"
+                        type="submit"
+                    >
+                        <span>PRIJAVA</span>
+                        <ArrowRight />
+                    </button>
+                    <GoogleButton @click="signInWithGoogle()" />
+                </div>
+            </form>
         </div>
 
-        <
-        <form
-            @submit.prevent="logIn()"
-            class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
-        >
-            <div v-for="item in loginData" class="main-container">
-                <span class="log-reg-label">{{ item.label }}</span>
-                <div class="log-reg-field">
-                    <component :is="item.icon" size="30" />
-                    <input
-                        :class="{ 'text-mm-white': item.data.value }"
-                        :type="item.type"
-                        :inputmode="item.inputmode"
-                        :placeholder="item.placeholder"
-                        class="w-full px-1"
-                        v-model="item.data.value"
-                    />
-                </div>
-            </div>
-            <div class="relative flex flex-col items-center">
-                <span v-if="loginErr" class="absolute top-1 text-mm-error">{{
-                    loginErr
-                }}</span>
-                <hr class="border-mm-gray w-full" />
-            </div>
-            <div class="flex flex-col gap-6 max-w-50 mx-auto">
-                <button
-                    class="confirm-btn flex gap-3 place-items-center text-lg"
-                    :disabled="!(email && password)"
-                    type="submit"
-                >
-                    <span>PRIJAVA</span>
-                    <ArrowRight />
-                </button>
-                <GoogleButton @click="signInWithGoogle()" />
-            </div>
-        </form>
-
-        <LoginRegisterBar class="fixed bottom-0 w-full" />
+        <LoginRegisterBar />
     </div>
 </template>

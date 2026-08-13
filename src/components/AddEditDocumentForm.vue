@@ -20,6 +20,7 @@
         clientName: "",
         clientId: null,
         description: null,
+        status: null,
     });
 
     const statusDropOpen = ref(false);
@@ -65,19 +66,21 @@
             ),
     );
 
-    watch(
-        () => documentsForm.clientName,
-        () => {
-            const client = allClients.value.find(
-                (c) => c.name === documentsForm.clientName,
-            );
+    if (!props.isEdit) {
+        watch(
+            () => documentsForm.clientName,
+            () => {
+                const client = allClients.value.find(
+                    (c) => c.name === documentsForm.clientName,
+                );
 
-            if (!documentsForm.clientId && client)
-                documentsForm.clientId = client.id;
-            if (documentsForm.clientId && !client)
-                documentsForm.clientId = null;
-        },
-    );
+                if (!documentsForm.clientId && client)
+                    documentsForm.clientId = client.id;
+                if (documentsForm.clientId && !client)
+                    documentsForm.clientId = null;
+            },
+        );
+    }
 
     onMounted(async () => {
         if (props.isEdit && props.selected)
@@ -111,7 +114,15 @@
         class="main-container"
     >
         <div v-if="isEdit" class="input-block-h">
-            <label for="status" class="input-label">STATUS:</label>
+            <label
+                for="status"
+                class="input-label"
+                @click="
+                    console.log(selected);
+                    console.log(documentsForm);
+                "
+                >STATUS:</label
+            >
             <div id="status" class="relative w-40">
                 <div
                     class="input-field flex justify-between items-center border border-transparent border-b-0"
@@ -204,7 +215,11 @@
                 type="submit"
                 class="confirm-btn"
             >
-                {{ isEdit ? "UREDI ARTIKL" : "UNESI ARTIKL" }}
+                {{
+                    isEdit
+                        ? routesData[route.name].modalTitles.edit.toUpperCase()
+                        : routesData[route.name].modalTitles.add.toUpperCase()
+                }}
             </button>
             <span
                 v-if="errMsg"
