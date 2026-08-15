@@ -1,14 +1,17 @@
 <script setup>
     import doctypesData from "@/data/doctypesData";
     import firebaseError from "@/data/errorsData";
+    import routesData from "@/data/routesData";
     import { auth } from "@/firebase";
     import { downloadPDF } from "@/utils/downloadPDF";
     import {
         ArrowLeft,
         Component,
         Download,
+        Funnel,
         LogOut,
         Menu,
+        Search,
         User,
     } from "@lucide/vue";
     import { signOut } from "firebase/auth";
@@ -17,10 +20,19 @@
 
     const router = useRouter();
     const route = useRoute();
+
+    defineEmits(["openInfo", "openFilter"]);
     defineProps({
         infoActive: Boolean,
+        filterOpened: Boolean,
+        filterActive: Boolean,
         docTitle: String,
         downloadData: Array,
+    });
+
+    const hideHeader = defineModel("hideHeader", {
+        type: Boolean,
+        default: false,
     });
 
     const openMenu = ref(false);
@@ -44,6 +56,7 @@
     <div class="h-dvh flex flex-col bg-mm-dark">
         <!-- Header za smartphone -->
         <div
+            v-if="!hideHeader"
             class="relative bg-mm-navy h-20 flex items-center justify-between gap-3 px-6"
         >
             <RouterLink
@@ -55,7 +68,6 @@
             <span
                 v-if="route.name === 'dashboard'"
                 class="text-5xl font-extrabold"
-                @click="console.log(auth.currentUser)"
             >
                 <span class="text-mm-white">BIZ</span>
                 <span class="text-mm-primary">MON</span>
@@ -80,6 +92,33 @@
                     }"
                     @click="
                         $emit('openInfo');
+                        openMenu = false;
+                    "
+                />
+                <Funnel
+                    v-if="
+                        route.name in routesData &&
+                        routesData[route.name].isDocument
+                    "
+                    class="header-icon"
+                    :class="[
+                        {
+                            'text-mm-success!': filterActive && !filterOpened,
+                        },
+                        {
+                            'icon-active': filterOpened,
+                        },
+                    ]"
+                    @click="
+                        $emit('openFilter');
+                        openMenu = false;
+                    "
+                />
+                <Search
+                    v-if="route.name in routesData"
+                    class="header-icon"
+                    @click="
+                        hideHeader = true;
                         openMenu = false;
                     "
                 />

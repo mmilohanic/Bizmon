@@ -12,9 +12,25 @@
         updateDocument,
         userData,
     } from "@/firebase";
+    import filterByDateRange from "@/utils/filterUtils";
     import { formatPrice } from "@/utils/formatUtils";
-    import { Info, LoaderCircle, Plus, SaveCheck } from "@lucide/vue";
-    import { onMounted, ref } from "vue";
+    import {
+        ArrowDown,
+        ArrowUp,
+        Info,
+        LoaderCircle,
+        Plus,
+        SaveCheck,
+        X,
+    } from "@lucide/vue";
+    import {
+        computed,
+        nextTick,
+        onMounted,
+        ref,
+        useTemplateRef,
+        watch,
+    } from "vue";
     import { useRoute, useRouter } from "vue-router";
 
     const route = useRoute();
@@ -25,6 +41,14 @@
     const activeModal = ref(null);
     const errMsg = ref(null);
     const loading = ref(true);
+    const showSearch = ref(false);
+    const searchPhrase = ref("");
+    const searchField = useTemplateRef("searchField");
+    const filterFrom = ref("");
+    const filterTo = ref("");
+    const sortBy = ref("createdAt");
+    const sortDir = ref("desc");
+    const filteredSortedItems = ref(null);
 
     function openModal(name, item = null) {
         selected.value = item;
@@ -37,6 +61,41 @@
             Object.entries(item).map(([k, v]) => [k, v === "" ? null : v]),
         );
     }
+
+    function filterAndSort() {
+        function parseDate(date) {
+            if (!date.length) return;
+
+            const [y, m, d] = date.split("-").map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        filteredSortedItems.value = filterByDateRange(
+            items.value,
+            parseDate(filterFrom.value),
+            parseDate(filterTo.value),
+        );
+
+        filteredSortedItems.value.sort(
+            (a, b) =>
+                (sortDir.value === "asc"
+                    ? a[sortBy.value] - b[sortBy.value]
+                    : b[sortBy.value] - a[sortBy.value]) ||
+                a.name.localeCompare(b.name),
+        );
+
+        openModal(null);
+    }
+
+    const displayItems = computed(() => {
+        const prioritized = filteredSortedItems.value ?? items.value;
+
+        return prioritized.filter((item) =>
+            `${item.name} ${item.clientName}`
+                .toLowerCase()
+                .includes(searchPhrase.value.toLowerCase()),
+        );
+    });
 
     async function addData(item) {
         errMsg.value = null;
@@ -123,6 +182,13 @@
         return `border-mm-${color} text-mm-${color}`;
     }
 
+    watch(showSearch, async (open) => {
+        if (open) {
+            await nextTick();
+            searchField.value.focus();
+        }
+    });
+
     onMounted(async () => {
         routesData[route.name].isDocument
             ? await getData(route.name, "createdAt", "desc")
@@ -133,7 +199,39 @@
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout
+        :filter-opened="activeModal === 'filter'"
+        :filter-active="Boolean(filteredSortedItems)"
+        @open-filter="openModal('filter')"
+        v-model:hide-header="showSearch"
+    >
+        <!-- Tražilica -->
+        <div
+            v-if="showSearch"
+            class="bg-mm-navy h-20 grid place-items-center p-4"
+        >
+            <div
+                class="bg-mm-lightnavy border border-mm-gray flex size-full rounded-xl p-1"
+            >
+                <input
+                    ref="searchField"
+                    type="text"
+                    class="w-full placeholder:text-mm-gray text-mm-white focus:outline-none px-3"
+                    placeholder="Unesi pojam..."
+                    v-model="searchPhrase"
+                />
+                <button
+                    @click="
+                        showSearch = false;
+                        searchPhrase = '';
+                    "
+                    class="ps-1.5 pe-1 border-l border-mm-gray"
+                >
+                    <X class="text-mm-muted size-7" />
+                </button>
+            </div>
+        </div>
+
         <!-- Gumb za dodavanje -->
         <div
             @click="openModal('add')"
@@ -194,7 +292,7 @@
             <!-- Učitavanje dokumenata -->
             <CardBase
                 v-if="routesData[route.name].isDocument"
-                v-for="(item, idx) in items"
+                v-for="(item, idx) in displayItems"
                 class="bg-mm-lightnavy rounded-2xl p-4"
                 :route-to="`/${route.name}/${item.id}`"
                 :key="idx"
@@ -255,7 +353,7 @@
             />
         </ModalBase>
 
-        <!-- Modal za info artikla i klijenata -->
+        <!-- Modal za info artikla, klijenata i dokumenata -->
         <ModalBase
             v-if="activeModal === 'info'"
             @click="openModal(null)"
@@ -288,5 +386,176 @@
                 </div>
             </div>
         </ModalBase>
+
+        <!-- Modal za filtriranje -->
+        <ModalBase
+            v-if="activeModal === 'filter'"
+            @click="openModal(null)"
+            title="Filtriranje i sortiranje"
+        >
+            <form @submit.prevent="filterAndSort" class="flex flex-col gap-4">
+                <div class="flex flex-col gap-4 px-1">
+                    <div class="flex gap-2">
+                        <div class="input-block-v">
+                            <label for="start" class="modal-label">OD:</label>
+                            <input
+                                id="start"
+                                name="start"
+                                type="date"
+                                class="input-field"
+                                :max="filterTo"
+                                v-model="filterFrom"
+                            />
+                        </div>
+                        <div class="input-block-v">
+                            <label for="end" class="modal-label">DO:</label>
+                            <input
+                                id="end"
+                                name="end"
+                                type="date"
+                                class="input-field"
+                                :min="filterFrom"
+                                v-model="filterTo"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <hr class="text-mm-gray" />
+                <div class="flex flex-col gap-4 px-1">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-2">
+                            <span class="modal-label">SORTIRAJ PO:</span>
+                            <div class="flex gap-4">
+                                <label
+                                    class="sort-btn"
+                                    :class="{
+                                        'sort-btn-active':
+                                            sortBy === 'createdAt',
+                                    }"
+                                    @click="sortBy = 'createdAt'"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="sortBy"
+                                        value="createdAt"
+                                        class="sr-only"
+                                    />
+                                    <span>Datum</span>
+                                </label>
+                                <label
+                                    class="sort-btn"
+                                    :class="{
+                                        'sort-btn-active': sortBy === 'total',
+                                    }"
+                                    @click="sortBy = 'total'"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="sortBy"
+                                        value="total"
+                                        class="sr-only"
+                                    />
+                                    <span>Iznos</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="modal-label">SMJER:</span>
+                            <div class="flex gap-2">
+                                <label
+                                    class="sort-btn"
+                                    :class="{
+                                        'sort-btn-active': sortDir === 'asc',
+                                    }"
+                                    @click="sortDir = 'asc'"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="sortDir"
+                                        value="asc"
+                                        class="sr-only"
+                                    />
+                                    <div class="flex gap-2 items-center">
+                                        <span>Rastuće</span>
+                                        <ArrowUp class="stroke-3" />
+                                    </div>
+                                </label>
+                                <label
+                                    class="sort-btn"
+                                    :class="{
+                                        'sort-btn-active': sortDir === 'desc',
+                                    }"
+                                    @click="sortDir = 'desc'"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="sortDir"
+                                        value="desc"
+                                        class="sr-only"
+                                    />
+                                    <div class="flex gap-2 items-center">
+                                        <span>Opadajuće</span>
+                                        <ArrowDown class="stroke-3" />
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr class="text-mm-gray" />
+                <div class="flex gap-4 px-1">
+                    <button
+                        type="button"
+                        class="button text-mm-muted border-mm-gray"
+                        @click="
+                            filterFrom = '';
+                            filterTo = '';
+                            sortBy = 'createdAt';
+                            sortDir = 'desc';
+                            filteredSortedItems = null;
+                            openModal(null);
+                        "
+                    >
+                        PONIŠTI
+                    </button>
+                    <button
+                        type="submit"
+                        class="button bg-mm-primary border-mm-primary text-mm-dark"
+                    >
+                        PRIMIJENI
+                    </button>
+                </div>
+            </form>
+        </ModalBase>
     </AppLayout>
 </template>
+
+<style scoped>
+    @reference "@/assets/main.css";
+
+    .sort-btn {
+        @apply flex items-center justify-center py-1 w-full;
+        @apply font-bold text-mm-white border border-mm-muted rounded-full;
+    }
+
+    .sort-btn-active {
+        @apply bg-mm-primary border-mm-primary text-mm-lightnavy;
+    }
+
+    .modal-label {
+        @apply font-semibold text-lg ps-1;
+    }
+
+    .input-block-v {
+        @apply gap-1 min-w-0 w-1/2;
+    }
+
+    .input-field {
+        @apply min-w-0 text-base;
+    }
+
+    .button {
+        @apply w-full h-fit py-2 mt-2;
+        @apply border rounded-full font-extrabold tracking-wider;
+    }
+</style>

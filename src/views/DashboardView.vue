@@ -4,6 +4,7 @@
     import doctypesData from "@/data/doctypesData";
     import firebaseError from "@/data/errorsData";
     import { auth, db, loggedUser, readCollection, userData } from "@/firebase";
+    import filterByDateRange from "@/utils/filterUtils";
     import { formatPrice } from "@/utils/formatUtils";
     import {
         ChartNoAxesCombined,
@@ -22,7 +23,7 @@
         updatePassword,
     } from "firebase/auth";
     import { doc, updateDoc } from "firebase/firestore";
-    import { computed, onMounted, reactive, ref, watch } from "vue";
+    import { computed, onMounted, reactive, ref } from "vue";
     import { useRouter } from "vue-router";
 
     const router = useRouter();
@@ -60,28 +61,20 @@
         { label: "od početka", start: null },
     ];
 
-    function filterByRange(arr = [], range = selected.value) {
-        return arr.filter(
-            (document) =>
-                document.createdAt.toDate() >= range.start &&
-                document.createdAt.toDate() <= (range.end ?? new Date()),
-        );
-    }
-
     const selected = ref(options[0]);
     const open = ref(false);
 
     const documentCounts = computed(() =>
-        selected.value.start
-            ? Object.fromEntries(
-                  Object.keys(documents).map((key) => [
-                      key,
-                      filterByRange(documents[key]).length,
-                  ]),
-              )
-            : Object.fromEntries(
-                  Object.entries(documents).map(([k, v]) => [k, v.length]),
-              ),
+        Object.fromEntries(
+            Object.keys(documents).map((key) => [
+                key,
+                filterByDateRange(
+                    documents[key],
+                    selected.value.start,
+                    selected.value.end,
+                ).length,
+            ]),
+        ),
     );
 
     const invoicesInfo = computed(() => {
@@ -98,7 +91,11 @@
             },
         ];
 
-        const filteredInvoices = filterByRange(documents.invoices);
+        const filteredInvoices = filterByDateRange(
+            documents.invoices,
+            selected.value.start,
+            selected.value.end,
+        );
 
         filteredInvoices.forEach((inv) => {
             const idx = Number(inv.status !== "Plaćen");
@@ -318,9 +315,7 @@
             <div class="dashboard-section">
                 <div class="flex gap-2 items-center">
                     <CreditCard class="size-8" />
-                    <span class="text-[28px]" @click="console.log(invoicesInfo)"
-                        >Računi</span
-                    >
+                    <span class="text-[28px]">Računi</span>
                 </div>
                 <hr class="border-mm-gray border mt-2 mb-4" />
                 <div class="flex flex-col gap-3 px-1">
