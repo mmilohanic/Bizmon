@@ -63,7 +63,7 @@
                     @click="emit('edit')"
                     class="text-mm-primary font-bold py-1.5 border rounded-lg w-1/2"
                 >
-                    Uredi artikl
+                    {{ routesData[route.name].modalLabels.edit }}
                 </button>
                 <button
                     @click="
@@ -78,7 +78,7 @@
                             : 'border border-mm-error text-mm-error font-bold'
                     "
                 >
-                    Obriši artikl
+                    {{ routesData[route.name].modalLabels.delete }}
                 </button>
             </div>
             <span

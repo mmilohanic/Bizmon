@@ -16,6 +16,7 @@
     import { formatPrice } from "@/utils/formatUtils";
     import {
         ArrowDown,
+        ArrowRight,
         ArrowUp,
         Info,
         LoaderCircle,
@@ -23,6 +24,7 @@
         SaveCheck,
         X,
     } from "@lucide/vue";
+    import { Timestamp } from "firebase/firestore";
     import {
         computed,
         nextTick,
@@ -41,6 +43,7 @@
     const activeModal = ref(null);
     const errMsg = ref(null);
     const loading = ref(true);
+    const newDoc = ref(null);
     const showSearch = ref(false);
     const searchPhrase = ref("");
     const searchField = useTemplateRef("searchField");
@@ -101,9 +104,15 @@
         errMsg.value = null;
         try {
             item = handleBlanks(item);
-            const response = await createDocument(route.name, item);
+            newDoc.value = await createDocument(route.name, item);
 
-            router.push(`/${route.name}/${response.id}`);
+            if (routesData[route.name].isDocument)
+                item["createdAt"] = Timestamp.now();
+
+            item["id"] = newDoc.value.id;
+            items.value.push(item);
+
+            openModal("succ");
         } catch (error) {
             errMsg.value = firebaseError(error.code);
         }
@@ -336,7 +345,7 @@
                     ? openModal('info', selected)
                     : openModal(null)
             "
-            :title="routesData[route.name].modalTitles[activeModal]"
+            :title="routesData[route.name].modalLabels[activeModal]"
             @exit="
                 activeModal === 'edit'
                     ? openModal('info', selected)
@@ -375,14 +384,43 @@
             @click="openModal(null)"
             :hide-title="true"
         >
-            <div class="flex flex-col items-center gap-5">
+            <div
+                @click="openModal(null)"
+                class="flex flex-col items-center gap-5"
+            >
                 <SaveCheck class="size-20 stroke-1 text-mm-success" />
                 <hr class="border-mm-gray w-full" />
                 <div
                     class="text-2xl text-mm-white flex flex-col items-center font-extralight text-center"
                 >
                     <span>{{ routesData[route.name].infoMsgs.succ }}</span>
-                    <span>Klik izvan okvira za izlaz.</span>
+                </div>
+                <hr class="border-mm-gray w-full" />
+                <div class="flex items-center justify-center gap-4 w-full">
+                    <button
+                        class="button text-mm-primary border-mm-primary"
+                        :class="{
+                            'w-fit! px-5': !routesData[route.name].isDocument,
+                        }"
+                        @click="openModal(null)"
+                    >
+                        {{
+                            routesData[route.name].isDocument
+                                ? "U REDU"
+                                : "NASTAVI"
+                        }}
+                    </button>
+                    <button
+                        v-if="routesData[route.name].isDocument"
+                        class="button flex items-center justify-center gap-2 bg-mm-primary border-mm-primary text-mm-dark"
+                        @click="
+                            router.push(newDoc.path);
+                            newDoc = null;
+                        "
+                    >
+                        OTVORI
+                        <ArrowRight />
+                    </button>
                 </div>
             </div>
         </ModalBase>
@@ -392,6 +430,7 @@
             v-if="activeModal === 'filter'"
             @click="openModal(null)"
             title="Filtriranje i sortiranje"
+            @exit="openModal(null)"
         >
             <form @submit.prevent="filterAndSort" class="flex flex-col gap-4">
                 <div class="flex flex-col gap-4 px-1">
@@ -539,7 +578,7 @@
     }
 
     .sort-btn-active {
-        @apply bg-mm-primary border-mm-primary text-mm-lightnavy;
+        @apply border-mm-primary text-mm-primary;
     }
 
     .modal-label {
@@ -551,7 +590,7 @@
     }
 
     .input-field {
-        @apply min-w-0 text-base;
+        @apply min-w-0 text-base max-w-full;
     }
 
     .button {

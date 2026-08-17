@@ -114,15 +114,7 @@
         class="main-container"
     >
         <div v-if="isEdit" class="input-block-h">
-            <label
-                for="status"
-                class="input-label"
-                @click="
-                    console.log(selected);
-                    console.log(documentsForm);
-                "
-                >STATUS:</label
-            >
+            <label for="status" class="input-label">STATUS:</label>
             <div id="status" class="relative w-40">
                 <div
                     class="input-field flex justify-between items-center border border-transparent border-b-0"
@@ -215,11 +207,7 @@
                 type="submit"
                 class="confirm-btn"
             >
-                {{
-                    isEdit
-                        ? routesData[route.name].modalTitles.edit.toUpperCase()
-                        : routesData[route.name].modalTitles.add.toUpperCase()
-                }}
+                {{ isEdit ? "POTVRDA IZMJENA" : "POTVRDA UNOSA" }}
             </button>
             <span
                 v-if="errMsg"

@@ -9,9 +9,10 @@ export default {
     items: {
         addEditModal: AddEditItemForm,
         infoModal: ItemInfo,
-        modalTitles: {
-            add: "Unos artikla",
+        modalLabels: {
+            add: "Unesi artikl",
             edit: "Uredi artikl",
+            delete: "Obriši artikl",
         },
         infoMsgs: {
             none: "Nema artikala",
@@ -22,9 +23,10 @@ export default {
     clients: {
         addEditModal: AddEditClientForm,
         infoModal: ClientInfo,
-        modalTitles: {
-            add: "Unos klijenta",
+        modalLabels: {
+            add: "Unesi klijenta",
             edit: "Uredi klijenta",
+            delete: "Obriši klijenta",
         },
         infoMsgs: {
             none: "Nema klijenata",
@@ -35,9 +37,10 @@ export default {
     quotes: {
         addEditModal: AddEditDocumentForm,
         infoModal: DocumentInfo,
-        modalTitles: {
-            add: "Unos ponude",
+        modalLabels: {
+            add: "Unesi ponudu",
             edit: "Uredi ponudu",
+            delete: "Obriši ponudu",
         },
         infoMsgs: {
             none: "Nema ponuda",
@@ -54,9 +57,10 @@ export default {
     orders: {
         addEditModal: AddEditDocumentForm,
         infoModal: DocumentInfo,
-        modalTitles: {
-            add: "Unos narudžbe",
+        modalLabels: {
+            add: "Unesi narudžbu",
             edit: "Uredi narudžbu",
+            delete: "Obriši narudžbu",
         },
         infoMsgs: {
             none: "Nema narudžbi",
@@ -72,9 +76,10 @@ export default {
     "work-orders": {
         addEditModal: AddEditDocumentForm,
         infoModal: DocumentInfo,
-        modalTitles: {
-            add: "Unos radnog naloga",
-            edit: "Uredi radni nalog",
+        modalLabels: {
+            add: "Unesi nalog",
+            edit: "Uredi nalog",
+            delete: "Obriši nalog",
         },
         infoMsgs: {
             none: "Nema radnih naloga",
@@ -89,9 +94,10 @@ export default {
     invoices: {
         addEditModal: AddEditDocumentForm,
         infoModal: DocumentInfo,
-        modalTitles: {
-            add: "Unos računa",
+        modalLabels: {
+            add: "Unesi račun",
             edit: "Uredi račun",
+            delete: "Obriši račun",
         },
         infoMsgs: {
             none: "Nema računa",
