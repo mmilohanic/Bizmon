@@ -3,7 +3,15 @@
     import ModalBase from "@/components/ModalBase.vue";
     import doctypesData from "@/data/doctypesData";
     import firebaseError from "@/data/errorsData";
-    import { auth, db, loggedUser, readCollection, userData } from "@/firebase";
+    import routesData from "@/data/routesData";
+    import {
+        auth,
+        db,
+        deleteDocument,
+        loggedUser,
+        readCollection,
+        userData,
+    } from "@/firebase";
     import filterByDateRange from "@/utils/filterUtils";
     import { formatPrice } from "@/utils/formatUtils";
     import {
@@ -149,15 +157,16 @@
                 EmailAuthProvider.credential(user.email, password.value),
             );
 
-            await updateDoc(doc(db, "users", user.uid), {
-                username: "Deleted user",
-                email: "",
-                active: false,
-            });
+            for (const docType of Object.keys(routesData)) {
+                const docs = await readCollection(docType, "ownerId", "asc");
+                for (const d of docs) await deleteDocument(docType, d.id);
+            }
 
+            await deleteDocument("users", user.uid);
             await deleteUser(user);
             router.push("/login");
         } catch (error) {
+            console.log(error);
             if (
                 ["auth/invalid-credential", "auth/wrong-password"].includes(
                     error.code,
@@ -214,12 +223,12 @@
         try {
             await reauthenticateWithPopup(user, new GoogleAuthProvider());
 
-            await updateDoc(doc(db, "users", user.uid), {
-                username: "Deleted user",
-                email: "",
-                active: false,
-            });
+            for (const docType of Object.keys(routesData)) {
+                const docs = await readCollection(docType, "ownerId", "asc");
+                for (const d of docs) await deleteDocument(docType, d.id);
+            }
 
+            await deleteDocument("users", user.uid);
             await deleteUser(user);
             router.push("/login");
         } catch (error) {
@@ -254,10 +263,9 @@
     <AppLayout
         :info-active="activeModal === 'info'"
         @open-info="openModal('info')"
-        class="overflow-clip"
     >
         <div
-            class="top-0 flex items-center justify-between gap-4 bg-mm-navy border-y md:border-t-0 border-mm-gray px-8 py-2.5"
+            class="flex items-center justify-between gap-4 bg-mm-navy border-y md:border-t-0 border-mm-gray px-8 py-2.5"
         >
             <span class="text-xl font-semibold">Razdoblje:</span>
 
@@ -282,7 +290,7 @@
                         v-for="(option, idx) in options.filter(
                             (item) => item != selected,
                         )"
-                        class="w-[95%] mx-auto px-1 py-0.5 border-t border-mm-gray"
+                        class="w-19/20 mx-auto px-1 py-0.5 border-t border-mm-gray"
                         @click="select(option)"
                         :key="idx"
                     >

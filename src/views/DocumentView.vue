@@ -356,7 +356,7 @@
                                 'rounded-b-none! border-mm-white!':
                                     showDropdown,
                             }"
-                            placeholder="Pretraživanje klijenata..."
+                            placeholder="Pretraživanje stavki..."
                             @focus="itemsDropOpen = true"
                             @blur="itemsDropOpen = false"
                             v-model="docItemForm.name"
