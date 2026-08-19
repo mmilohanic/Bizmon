@@ -8,7 +8,7 @@
         KeyRound,
         Repeat2,
     } from "@lucide/vue";
-    import { ref, computed, onMounted } from "vue";
+    import { ref, computed } from "vue";
     import { useRouter } from "vue-router";
     import {
         createUserWithEmailAndPassword,
@@ -154,8 +154,12 @@
 
 <template>
     <div class="h-full flex flex-col justify-between bg-mm-dark">
-        <div class="flex flex-col items-center px-8 pb-8 overflow-y-auto">
-            <div class="py-10 text-7xl font-extrabold">
+        <div
+            class="flex flex-col items-center px-8 pb-8 overflow-y-auto scrollbar-none"
+        >
+            <LoginRegisterBar v-if="!succReg" class="hidden md:flex" />
+
+            <div class="py-10 md:py-22 text-7xl font-extrabold">
                 <span class="text-mm-white">BIZ</span>
                 <span class="text-mm-primary">MON</span>
             </div>
@@ -164,7 +168,7 @@
             <form
                 v-if="!succReg"
                 @submit.prevent="registerUser()"
-                class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
+                class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8 max-w-md"
             >
                 <div v-for="item in loginData" class="main-container">
                     <div
@@ -217,7 +221,7 @@
             <!-- Uspješna registracija -->
             <div
                 v-else
-                class="bg-mm-lightnavy px-6 pt-15 pb-18 rounded-3xl w-full flex flex-col gap-15 items-center"
+                class="bg-mm-lightnavy px-6 pt-15 pb-18 rounded-3xl w-full flex flex-col gap-15 items-center max-w-md"
             >
                 <CircleCheckBig class="size-35 stroke-[0.75] text-mm-success" />
                 <hr class="border-mm-gray w-full" />
@@ -237,6 +241,6 @@
             </div>
         </div>
 
-        <LoginRegisterBar v-if="!succReg" />
+        <LoginRegisterBar v-if="!succReg" class="md:hidden" />
     </div>
 </template>

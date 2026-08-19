@@ -97,15 +97,19 @@
 
 <template>
     <div class="h-full flex flex-col justify-between bg-mm-dark">
-        <div class="flex flex-col items-center px-8 pb-8 overflow-y-auto">
-            <div class="pt-10 pb-22 text-7xl font-extrabold">
+        <div
+            class="flex flex-col items-center px-8 pb-8 overflow-y-auto scrollbar-none"
+        >
+            <LoginRegisterBar class="hidden md:flex" />
+
+            <div class="pt-10 pb-22 md:py-22 text-7xl font-extrabold">
                 <span class="text-mm-white">BIZ</span>
                 <span class="text-mm-primary">MON</span>
             </div>
 
             <form
                 @submit.prevent="logIn()"
-                class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8"
+                class="bg-mm-lightnavy p-6 pb-8 rounded-3xl w-full flex flex-col gap-8 max-w-md"
             >
                 <div v-for="item in loginData" class="main-container">
                     <span class="log-reg-label">{{ item.label }}</span>
@@ -143,6 +147,6 @@
             </form>
         </div>
 
-        <LoginRegisterBar />
+        <LoginRegisterBar class="md:hidden" />
     </div>
 </template>

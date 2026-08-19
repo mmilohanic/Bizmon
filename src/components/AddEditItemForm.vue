@@ -65,15 +65,13 @@
             />
         </div>
         <div class="input-block-h">
-            <label for="price" class="input-label text-nowrap"
-                >JEDINIČNA CIJENA:</label
-            >
+            <label for="price" class="input-label">JEDINIČNA CIJENA:</label>
             <div class="relative flex items-center">
                 <input
                     id="price"
                     type="number"
                     inputmode="numeric"
-                    class="input-field w-full text-end max-w-22"
+                    class="input-field w-full text-end max-w-22 min-w-22"
                     style="padding-right: 27px"
                     placeholder="0.0"
                     step="0.01"
@@ -84,12 +82,10 @@
             </div>
         </div>
         <div class="input-block-h">
-            <label for="unit" class="input-label text-nowrap"
-                >JEDINIČNA MJERA:</label
-            >
-            <div id="unit" class="relative w-full max-w-22">
+            <label for="unit" class="input-label">JEDINIČNA MJERA:</label>
+            <div id="unit" class="relative w-full max-w-22 min-w-22">
                 <div
-                    class="input-field flex justify-between items-center border border-transparent border-b-0 min-h-11 max-h-11"
+                    class="input-field flex justify-between items-center border border-transparent border-b-0 min-h-11 max-h-11 cursor-pointer"
                     :class="{
                         ' rounded-b-none! border-mm-white!': dropdownOpen,
                     }"
@@ -101,7 +97,7 @@
 
                 <ul
                     v-if="dropdownOpen"
-                    class="absolute w-full bg-mm-navy text-mm-white rounded-b-xl max-h-40 overflow-y-auto border border-mm-white border-t-0"
+                    class="absolute w-full bg-mm-navy text-mm-white rounded-b-xl max-h-40 overflow-y-auto border border-mm-white border-t-0 cursor-pointer"
                 >
                     <li
                         v-for="(option, idx) in units.filter(

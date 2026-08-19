@@ -217,7 +217,7 @@
         <!-- Tražilica -->
         <div
             v-if="showSearch"
-            class="bg-mm-navy h-20 grid place-items-center p-4"
+            class="bg-mm-navy h-20 grid place-items-center p-4 md:border-b md:border-mm-gray"
         >
             <div
                 class="bg-mm-lightnavy border border-mm-gray flex size-full rounded-xl p-1"
@@ -244,13 +244,13 @@
         <!-- Gumb za dodavanje -->
         <div
             @click="openModal('add')"
-            class="fixed bottom-26 right-6 z-10 bg-mm-primary p-1.5 rounded-full border-2 border-mm-dark"
+            class="md:hidden fixed bottom-26 right-6 z-10 bg-mm-primary p-1.5 rounded-full border-2 border-mm-dark"
         >
             <Plus class="size-11 text-mm-navy" />
         </div>
 
         <!-- Prikaz artikala, klijenata i dokumenata -->
-        <div class="py-6 px-8 flex flex-col gap-4">
+        <div class="py-6 px-8">
             <!-- Obavijest o učitavanju elemenata -->
             <div
                 v-if="loading"
@@ -263,78 +263,91 @@
                 </span>
             </div>
 
-            <!-- Obavijest o nepostojanju elemenata -->
-            <div
-                v-if="!(loading || items.length)"
-                class="w-full h-full text-mm-white flex flex-col justify-center items-center text-2xl"
-            >
-                <span>{{ routesData[route.name].infoMsgs.none }}</span>
-                <span>za prikazivanje</span>
-            </div>
-
-            <!-- Učitavanje artikala i klijenata -->
-            <CardBase
-                v-if="!routesData[route.name].isDocument"
-                v-for="(item, idx) in items"
-                class="bg-mm-lightnavy rounded-2xl p-4"
-                :key="idx"
-            >
-                <div class="separate-and-center">
-                    <span class="text-mm-white text-xl font-medium">{{
-                        item.name
-                    }}</span>
-                    <Info
-                        @click="openModal('info', item)"
-                        class="text-mm-neutral"
-                    />
-                </div>
-                <hr v-if="route.name === 'items'" class="text-mm-gray" />
-                <div
-                    v-if="route.name === 'items'"
-                    class="separate-and-center text-mm-gray font-semibold"
+            <div v-else class="flex flex-col gap-4">
+                <span
+                    class="hidden md:block text-xl text-center font-bold text-mm-primary p-3 gap-2 w-full rounded-full border border-dashed border-mm-primary cursor-pointer"
+                    @click="openModal('add')"
                 >
-                    <span>Jedinična cijena:</span>
-                    <span>{{ item.price + " €/" + item.unit }}</span>
-                </div>
-            </CardBase>
+                    {{ routesData[route.name].modalLabels.add }}
+                </span>
 
-            <!-- Učitavanje dokumenata -->
-            <CardBase
-                v-if="routesData[route.name].isDocument"
-                v-for="(item, idx) in displayItems"
-                class="bg-mm-lightnavy rounded-2xl p-4"
-                :route-to="`/${route.name}/${item.id}`"
-                :key="idx"
-            >
-                <div class="separate-and-center">
-                    <span class="text-mm-white text-xl font-medium">{{
-                        item.name
-                    }}</span>
-                    <Info
-                        @click.stop.prevent="openModal('info', item)"
-                        class="text-mm-neutral"
-                    />
+                <!-- Obavijest o nepostojanju elemenata -->
+                <div
+                    v-if="!items.length"
+                    class="w-full h-full md:pt-5 text-mm-white flex flex-col justify-center items-center text-2xl"
+                >
+                    <span>{{ routesData[route.name].infoMsgs.none }}</span>
+                    <span>za prikazivanje</span>
                 </div>
-                <hr class="text-mm-gray" />
-                <div class="separate-and-center text-mm-muted font-semibold">
-                    <span>Kreirano:</span>
-                    <span>{{
-                        item.createdAt.toDate().toLocaleDateString("hr-HR")
-                    }}</span>
-                </div>
-                <div class="separate-and-center">
-                    <span class="text-mm-muted font-semibold">Status:</span>
-                    <span
-                        class="border rounded-full px-2"
-                        :class="statusStyle(item.status)"
-                        >{{ item.status }}</span
+
+                <!-- Učitavanje artikala i klijenata -->
+                <CardBase
+                    v-if="!routesData[route.name].isDocument"
+                    v-for="(item, idx) in items"
+                    class="bg-mm-lightnavy rounded-2xl p-4"
+                    :key="idx"
+                >
+                    <div class="separate-and-center">
+                        <span class="text-mm-white text-xl font-medium">{{
+                            item.name
+                        }}</span>
+                        <Info
+                            @click="openModal('info', item)"
+                            class="text-mm-neutral"
+                        />
+                    </div>
+                    <hr v-if="route.name === 'items'" class="text-mm-gray" />
+                    <div
+                        v-if="route.name === 'items'"
+                        class="separate-and-center text-mm-gray font-semibold"
                     >
-                </div>
-                <div class="separate-and-center text-mm-muted font-semibold">
-                    <span>Vrijednost:</span>
-                    <span>{{ formatPrice(item.total) }}</span>
-                </div>
-            </CardBase>
+                        <span>Jedinična cijena:</span>
+                        <span>{{ item.price + " €/" + item.unit }}</span>
+                    </div>
+                </CardBase>
+
+                <!-- Učitavanje dokumenata -->
+                <CardBase
+                    v-if="routesData[route.name].isDocument"
+                    v-for="(item, idx) in displayItems"
+                    class="bg-mm-lightnavy rounded-2xl p-4"
+                    :route-to="`/${route.name}/${item.id}`"
+                    :key="idx"
+                >
+                    <div class="separate-and-center">
+                        <span class="text-mm-white text-xl font-medium">{{
+                            item.name
+                        }}</span>
+                        <Info
+                            @click.stop.prevent="openModal('info', item)"
+                            class="text-mm-neutral"
+                        />
+                    </div>
+                    <hr class="text-mm-gray" />
+                    <div
+                        class="separate-and-center text-mm-muted font-semibold"
+                    >
+                        <span>Kreirano:</span>
+                        <span>{{
+                            item.createdAt.toDate().toLocaleDateString("hr-HR")
+                        }}</span>
+                    </div>
+                    <div class="separate-and-center">
+                        <span class="text-mm-muted font-semibold">Status:</span>
+                        <span
+                            class="border rounded-full px-2"
+                            :class="statusStyle(item.status)"
+                            >{{ item.status }}</span
+                        >
+                    </div>
+                    <div
+                        class="separate-and-center text-mm-muted font-semibold"
+                    >
+                        <span>Vrijednost:</span>
+                        <span>{{ formatPrice(item.total) }}</span>
+                    </div>
+                </CardBase>
+            </div>
         </div>
 
         <!-- Modal za unos i izmjenu artikla, klijenta i dokumenta -->
@@ -367,6 +380,7 @@
             v-if="activeModal === 'info'"
             @click="openModal(null)"
             :title="selected.name"
+            :smaller-title="true"
             @exit="openModal(null)"
         >
             <component

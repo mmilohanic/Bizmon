@@ -117,7 +117,7 @@
             <label for="status" class="input-label">STATUS:</label>
             <div id="status" class="relative w-40">
                 <div
-                    class="input-field flex justify-between items-center border border-transparent border-b-0"
+                    class="input-field flex justify-between items-center border border-transparent border-b-0 cursor-pointer"
                     :class="{
                         ' rounded-b-none! border-mm-white!': statusDropOpen,
                     }"
@@ -132,7 +132,7 @@
 
                 <ul
                     v-if="statusDropOpen"
-                    class="absolute w-full bg-mm-navy text-mm-white rounded-b-xl max-h-40 overflow-y-auto border border-mm-white border-t-0"
+                    class="absolute w-full bg-mm-navy text-mm-white rounded-b-xl max-h-40 overflow-y-auto border border-mm-white border-t-0 cursor-pointer"
                 >
                     <li
                         v-for="(option, idx) in Object.keys(statuses).filter(
@@ -177,7 +177,7 @@
 
                 <ul
                     v-if="showDropdown"
-                    class="absolute w-full bg-mm-navy text-mm-white max-h-40 rounded-b-xl overflow-y-auto border border-mm-white border-t-0 z-10"
+                    class="absolute w-full bg-mm-navy text-mm-white max-h-40 rounded-b-xl overflow-y-auto border border-mm-white border-t-0 z-10 cursor-pointer"
                 >
                     <li
                         v-for="(c, idx) in clients"

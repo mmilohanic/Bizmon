@@ -1,6 +1,7 @@
 <script setup>
     import { LogIn, UserPlus } from "@lucide/vue";
     import { ref } from "vue";
+    import { RouterLink } from "vue-router";
 
     const logRegData = ref([
         {
@@ -17,8 +18,10 @@
 </script>
 
 <template>
-    <div class="h-25 min-h-25 max-h-25 px-8 py-6 bg-mm-navy flex">
-        <router-link
+    <div
+        class="h-25 min-h-25 max-h-25 px-8 py-6 bg-mm-navy flex max-w-md w-full mx-auto md:rounded-b-3xl"
+    >
+        <RouterLink
             v-for="item in logRegData"
             :to="item.route"
             class="flex flex-col items-center justify-center w-1/2 text-mm-gray rounded-xl text-sm font-extrabold tracking-wide"
@@ -28,6 +31,6 @@
         >
             <component :is="item.icon" />
             <span>{{ item.label }}</span>
-        </router-link>
+        </RouterLink>
     </div>
 </template>

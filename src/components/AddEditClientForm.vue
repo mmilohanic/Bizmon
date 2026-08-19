@@ -137,7 +137,7 @@
             <label for="zip" class="input-label">ZIP:</label>
             <input
                 id="street_num"
-                type="number"
+                type="text"
                 inputmode="numeric"
                 class="input-field"
                 placeholder="npr. 52000"

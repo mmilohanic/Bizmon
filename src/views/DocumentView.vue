@@ -10,6 +10,7 @@
         updateDocument,
         userData,
     } from "@/firebase";
+    import { downloadPDF } from "@/utils/downloadPDF";
     import { formatPrice } from "@/utils/formatUtils";
     import {
         ChevronDown,
@@ -230,11 +231,15 @@
 <template>
     <AppLayout
         :doc-title="fsDocument ? fsDocument.name : ''"
-        :download-data="[fsDocument, route.meta.parentName, clientData]"
+        @trigger-download="
+            downloadPDF(fsDocument, route.meta.parentName, clientData)
+        "
     >
         <!-- Prikaz stavaka -->
-        <div class="py-6 px-8 flex flex-col gap-4 justify-between h-full">
-            <div class="flex flex-col gap-4 overflow-y-scroll">
+        <div class="py-6 px-8 flex flex-col gap-4 h-full min-h-0">
+            <div
+                class="flex-1 min-h-0 md:order-last flex flex-col gap-4 overflow-y-scroll scrollbar-none"
+            >
                 <!-- Obavijest o učitavanju elemenata -->
                 <div
                     v-if="loading"
@@ -250,7 +255,7 @@
                 <!-- Obavijest o nepostojanju elemenata -->
                 <div
                     v-if="!loading && !fsDocument.docItems.length"
-                    class="w-full h-screen text-mm-white flex flex-col justify-center items-center text-2xl"
+                    class="h-full text-mm-white flex flex-col justify-center items-center text-2xl"
                 >
                     <span>Nema stavaka</span>
                     <span>za prikazivanje</span>
@@ -290,7 +295,7 @@
 
             <!-- Ukupno i dodavanje -->
             <div
-                class="flex w-full"
+                class="flex w-full md:order-first"
                 :class="
                     fsDocument && fsDocument.docItems.length
                         ? 'gap-4 justify-between items-center'

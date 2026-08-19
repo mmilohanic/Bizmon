@@ -55,10 +55,13 @@
             start: new Date(year, month - 1, 1),
             end: new Date(year, month, 0),
         },
-        { label: "3 mjeseca", start: new Date(year, month - 3, day) },
-        { label: "6 mjeseci", start: new Date(year, month - 6, day) },
-        { label: "jedna godina", start: new Date(year - 1, month, day) },
-        { label: "od početka", start: null },
+        { label: "zadnja 3 mjeseca", start: new Date(year, month - 3, day) },
+        { label: "zadnjih 6 mjeseci", start: new Date(year, month - 6, day) },
+        {
+            label: "zadnjih godinu dana",
+            start: new Date(year - 1, month, day),
+        },
+        { label: "svi dokumenti", start: null },
     ];
 
     const selected = ref(options[0]);
@@ -251,42 +254,51 @@
     <AppLayout
         :info-active="activeModal === 'info'"
         @open-info="openModal('info')"
+        class="overflow-clip"
     >
-        <div class="py-6 px-8 flex flex-col gap-4">
+        <div
+            class="top-0 flex items-center justify-between gap-4 bg-mm-navy border-y md:border-t-0 border-mm-gray px-8 py-2.5"
+        >
+            <span class="text-xl font-semibold">Razdoblje:</span>
+
+            <!-- Filter dropdown -->
+            <div class="relative w-full max-w-xs">
+                <div
+                    class="flex bg-mm-lightnavy text-mm-white border border-mm-gray ps-2 pe-1 py-0.5 rounded justify-between items-center cursor-pointer"
+                    :class="{
+                        'rounded-b-none border-b-transparent': open,
+                    }"
+                    @click="open = !open"
+                >
+                    <span>{{ selected.label }}</span>
+                    <ChevronDown />
+                </div>
+
+                <ul
+                    v-if="open"
+                    class="absolute w-full bg-mm-lightnavy text-mm-white border border-mm-gray border-t-0 rounded-b shadow-xl shadow-mm-dark cursor-pointer"
+                >
+                    <li
+                        v-for="(option, idx) in options.filter(
+                            (item) => item != selected,
+                        )"
+                        class="w-[95%] mx-auto px-1 py-0.5 border-t border-mm-gray"
+                        @click="select(option)"
+                        :key="idx"
+                    >
+                        {{ option.label }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="py-6 px-8 flex flex-col gap-4 overflow-y-auto">
             <!-- Statistika -->
             <div class="dashboard-section">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center gap-2">
                     <div class="flex gap-2 items-start">
                         <ChartNoAxesCombined class="size-8 mt-0.5" />
                         <span class="text-[28px]">Statistika</span>
-                    </div>
-
-                    <!-- Filter dropdown -->
-                    <div class="relative w-35">
-                        <div
-                            class="flex bg-mm-white text-black ps-2 pe-1 py-0.5 rounded justify-between"
-                            :class="{ 'rounded-b-none': open }"
-                            @click="open = !open"
-                        >
-                            <span>{{ selected.label }}</span>
-                            <ChevronDown />
-                        </div>
-
-                        <ul
-                            v-if="open"
-                            class="absolute w-full bg-mm-white text-black rounded-b"
-                        >
-                            <li
-                                v-for="(option, idx) in options.filter(
-                                    (item) => item != selected,
-                                )"
-                                class="w-[95%] mx-auto px-1 py-0.5 border-t border-mm-gray"
-                                @click="select(option)"
-                                :key="idx"
-                            >
-                                {{ option.label }}
-                            </li>
-                        </ul>
                     </div>
                 </div>
 
