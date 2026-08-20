@@ -121,6 +121,14 @@
         activeModal.value = name;
     }
 
+    function handleDownload() {
+        if (fsDocument && fsDocument.docItems.length) {
+            downloadPDF(fsDocument, route.meta.parentName, clientData.value);
+        } else {
+            alert("Nije moguće preuzeti dokument bez stavki");
+        }
+    }
+
     function docItemsTotal(arr) {
         return arr.reduce((a, v) => a + v.price * v.amount, 0);
     }
@@ -231,9 +239,7 @@
 <template>
     <AppLayout
         :doc-title="fsDocument ? fsDocument.name : ''"
-        @trigger-download="
-            downloadPDF(fsDocument, route.meta.parentName, clientData)
-        "
+        @trigger-download="handleDownload"
     >
         <!-- Prikaz stavaka -->
         <div class="py-6 px-8 flex flex-col gap-4 h-full min-h-0">

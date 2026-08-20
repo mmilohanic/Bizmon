@@ -1,5 +1,4 @@
 <script setup>
-    import routesData from "@/data/routesData";
     import { X } from "@lucide/vue";
 
     const props = defineProps({
@@ -26,12 +25,7 @@
             <div v-if="!hideTitle">
                 <div class="flex justify-between items-center">
                     <span
-                        class="text-mm-white font-bold line-clamp-2"
-                        :class="
-                            $route.name in routesData && smallerTitle
-                                ? 'text-xl'
-                                : 'text-2xl tracking-wide'
-                        "
+                        class="text-mm-white text-2xl tracking-wide font-bold line-clamp-2"
                         >{{ title }}</span
                     >
                     <X class="size-8" @click="$emit('exit')" />

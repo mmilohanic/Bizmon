@@ -6,7 +6,6 @@
     import routesData from "@/data/routesData";
     import {
         auth,
-        db,
         deleteDocument,
         loggedUser,
         readCollection,
@@ -30,7 +29,6 @@
         reauthenticateWithPopup,
         updatePassword,
     } from "firebase/auth";
-    import { doc, updateDoc } from "firebase/firestore";
     import { computed, onMounted, reactive, ref } from "vue";
     import { useRouter } from "vue-router";
 

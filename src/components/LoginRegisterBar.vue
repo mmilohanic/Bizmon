@@ -1,7 +1,6 @@
 <script setup>
     import { LogIn, UserPlus } from "@lucide/vue";
     import { ref } from "vue";
-    import { RouterLink } from "vue-router";
 
     const logRegData = ref([
         {
