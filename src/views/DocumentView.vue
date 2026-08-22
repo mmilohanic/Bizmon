@@ -79,7 +79,7 @@
         () => itemsDropOpen.value && items.value.length,
     );
 
-    function selectClient(item) {
+    function selectItem(item) {
         delete item.description;
         item["amount"] = 1;
         Object.assign(docItemForm, item);
@@ -274,9 +274,10 @@
                     :key="idx"
                 >
                     <div class="separate-and-center">
-                        <span class="text-mm-white text-xl font-medium">{{
-                            item.name
-                        }}</span>
+                        <span
+                            class="text-mm-white text-xl font-medium line-clamp-2"
+                            >{{ item.name }}</span
+                        >
                         <div class="flex gap-3">
                             <Pencil
                                 @click="openModal('edit', idx)"
@@ -375,7 +376,7 @@
                             <li
                                 v-for="(c, idx) in items"
                                 class="mx-auto py-1 px-2"
-                                @mousedown.prevent="selectClient(c)"
+                                @mousedown.prevent="selectItem(c)"
                                 :key="idx"
                             >
                                 {{ c.name }}

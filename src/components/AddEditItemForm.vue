@@ -57,7 +57,6 @@
                 id="name"
                 type="text"
                 class="input-field"
-                maxlength="20"
                 placeholder="npr. Prijenosno računalo"
                 autocomplete="off"
                 required

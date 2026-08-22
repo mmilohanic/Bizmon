@@ -288,9 +288,10 @@
                     :key="idx"
                 >
                     <div class="separate-and-center">
-                        <span class="text-mm-white text-xl font-medium">{{
-                            item.name
-                        }}</span>
+                        <span
+                            class="text-mm-white text-xl font-medium line-clamp-2"
+                            >{{ item.name }}</span
+                        >
                         <Info
                             @click="openModal('info', item)"
                             class="text-mm-neutral"
@@ -315,9 +316,10 @@
                     :key="idx"
                 >
                     <div class="separate-and-center">
-                        <span class="text-mm-white text-xl font-medium">{{
-                            item.name
-                        }}</span>
+                        <span
+                            class="text-mm-white text-xl font-medium line-clamp-2"
+                            >{{ item.name }}</span
+                        >
                         <Info
                             @click.stop.prevent="openModal('info', item)"
                             class="text-mm-neutral"

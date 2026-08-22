@@ -26,7 +26,6 @@
         filterOpened: Boolean,
         filterActive: Boolean,
         docTitle: String,
-        downloadData: Array,
     });
 
     const hideHeader = defineModel("hideHeader", {
@@ -258,7 +257,7 @@
                                   .label
                     }}
                 </span>
-                <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
                     <div
                         v-if="route.name === 'dashboard'"
                         class="flex items-center text-mm-white font font-semibold pe-3 cursor-pointer"
